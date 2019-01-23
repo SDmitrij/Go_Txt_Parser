@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 )
 
+/**
+Structure that describes file entity
+ */
 type File struct {
 	filePath string
 	fileUniqueKey string
@@ -15,6 +18,9 @@ type File struct {
 	fileSize int64
 }
 
+/**
+Get md 5 hash of each file
+ */
 func getMd5HashOfFile(filePath string) (string, error){
 	var retMd5Value string
 	file, err := os.Open(filePath)
@@ -31,6 +37,9 @@ func getMd5HashOfFile(filePath string) (string, error){
 	return retMd5Value, err
 }
 
+/**
+Get md 5 unique key of each file
+ */
 func getMd5FileUniqueKey(filename string) string{
 	var md5UniqueKey string
 	hash := md5.New()
@@ -40,6 +49,9 @@ func getMd5FileUniqueKey(filename string) string{
 	return hex.EncodeToString(hash.Sum(nil)[:16])
 }
 
+/**
+Get file size of each file
+ */
 func getFileSize(filePath string) (int64, error){
 	var fileSize int64
 	file, err := os.Open(filePath)
@@ -57,6 +69,9 @@ func getFileSize(filePath string) (int64, error){
 	return fileSize, err
 }
 
+/**
+Init file objects
+ */
 func initFileObjects(filePaths []string) []File{
 	var files []File
 	for _, path := range filePaths {
@@ -71,6 +86,9 @@ func initFileObjects(filePaths []string) []File{
 	return files
 }
 
+/**
+Read folder with texts to index
+ */
 func readFolder(dir string) []string {
 	var filesPaths []string
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
