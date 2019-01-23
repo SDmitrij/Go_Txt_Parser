@@ -6,7 +6,7 @@ import (
 
 func main() {
 
-	paths := readFolder("/Go_parser_core/texts/")
+	paths := getMainFilesInfo("/Go_parser_core/texts/")
 	files := initFileObjects(paths)
 
 	for _, file := range files {
@@ -15,9 +15,6 @@ func main() {
 	}
 
 	idx := indexing{&files}
-
-	for _, file := range *idx.filesToIndex {
-		fmt.Printf("I'm file to index: %s\n", file)
-	}
+	fmt.Println(*idx.filesToIndex)
 
 }

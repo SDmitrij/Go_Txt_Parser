@@ -50,35 +50,15 @@ func getMd5FileUniqueKey(filename string) string{
 }
 
 /**
-Get file size of each file
- */
-func getFileSize(filePath string) (int64, error){
-	var fileSize int64
-	file, err := os.Open(filePath)
-	if err != nil {
-		return fileSize, err
-	}
-	defer file.Close()
-	stat, err := file.Stat()
-	if err != nil {
-		return fileSize, err
-	}
-
-	fileSize = stat.Size()
-
-	return fileSize, err
-}
-
-/**
 Init file objects
  */
-func initFileObjects(filePaths []string) []File{
+func initFileObjects(filesInfo map[string] int64) []File{
 	var files []File
-	for _, path := range filePaths {
+	for path, size := range filesInfo {
 		filesHash, errFileHash := getMd5HashOfFile(path)
 		uniqueFileKey := getMd5FileUniqueKey(filepath.Base(path))
-		fileSize, errFileSize := getFileSize(path)
-		if errFileHash == nil && errFileSize == nil {
+		fileSize := size
+		if errFileHash == nil{
 			files = append(files, File{filePath: path, fileUniqueKey: uniqueFileKey, fileHash: filesHash, fileSize: fileSize})
 		}
 	}
@@ -87,13 +67,13 @@ func initFileObjects(filePaths []string) []File{
 }
 
 /**
-Read folder with texts to index
+Read folder with texts to index and get file's size and path
  */
-func readFolder(dir string) []string {
-	var filesPaths []string
+func getMainFilesInfo(dir string) map[string] int64 {
+	var filesInfo  = make(map[string] int64)
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if path != dir {
-			filesPaths = append(filesPaths, path)
+		if !info.IsDir() {
+			filesInfo[path] = info.Size()
 		}
 		return nil
 	})
@@ -102,5 +82,5 @@ func readFolder(dir string) []string {
 		panic(err)
 	}
 
-	return filesPaths
+	return filesInfo
 }
