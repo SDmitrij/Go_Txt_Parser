@@ -70,7 +70,7 @@ func initFileObjects(filesInfo map[string] int64) []File{
 Read folder with texts to index and get file's size and path
  */
 func getMainFilesInfo(dir string) map[string] int64 {
-	var filesInfo  = make(map[string] int64)
+	var filesInfo = make(map[string] int64)
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			filesInfo[path] = info.Size()
