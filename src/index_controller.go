@@ -12,6 +12,9 @@ type indexing struct {
 	filesRepo *filesRepo
 }
 
+/**
+Init files main info into table
+ */
 func (idx *indexing) initFilesInfo() {
 	for _, file := range *idx.filesToIndex {
 		idx.filesRepo.insIntoMainInfoFileTable(file)
