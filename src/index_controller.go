@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 )
 
@@ -10,21 +9,13 @@ This struct describes indexing process
  */
 type indexing struct {
 	filesToIndex *[]File
-	filesRepo *sql.DB
+	filesRepo *filesRepo
 }
 
-/**
-Create an entry database
- */
-func (idx *indexing) createEntryDatabase() {
-	_, err := idx.filesRepo.Exec("CREATE DATABASE IF NOT EXISTS go_parser_core")
-	if err != nil {
-		panic(err)
+func (idx *indexing) initFilesInfo() {
+	for _, file := range *idx.filesToIndex {
+		idx.filesRepo.insIntoMainInfoFileTable(file)
 	}
-}
-
-func (idx *indexing) createFilesInfoTable() {
-
 }
 
 /**
@@ -36,10 +27,16 @@ func (idx *indexing) indexing() {
 	}
 }
 
+/**
+Search all matches and get results
+ */
 func (idx indexing) searching() {
 
 }
 
+/**
+Exclude or include files to index
+ */
 func (idx indexing) excludeOrIncludeFiles() {
 
 }
