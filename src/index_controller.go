@@ -30,13 +30,13 @@ func (idx *indexing) indexing() {
 /**
 Search all matches and get results
  */
-func (idx indexing) searching() {
+func (idx *indexing) searching() {
 
 }
 
 /**
 Exclude or include files to index
  */
-func (idx indexing) excludeOrIncludeFiles() {
+func (idx *indexing) excludeOrIncludeFiles() {
 
 }

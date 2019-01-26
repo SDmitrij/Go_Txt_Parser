@@ -3,7 +3,7 @@ package main
 import "database/sql"
 
 type filesRepo struct {
-	dbTblParams map[string] string
+	dbTblParams map[string]string
 	dbConnection *sql.DB
 }
 
@@ -84,3 +84,26 @@ func (fr *filesRepo) insIntoMainInfoFileTable(file File) {
 	}
 }
 
+/**
+Insert data into table with strings of current file
+ */
+func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string,  lineCounter int) {
+	_, err := fr.dbConnection.Exec("INSERT INTO "+fr.dbTblParams["db_name"]+"."+fr.dbTblParams["tbl_str_pref"]+
+		stringAndKey["file_key"] + "(string_of_file, num_of_line) VALUES (?, ?)",
+		stringAndKey["str_of_file"], lineCounter)
+	if err != nil {
+		panic(err)
+	}
+}
+
+/**
+Insert data into table with words of current file
+ */
+func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, lineCounter int) {
+	_, err := fr.dbConnection.Exec("INSERT INTO " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_wrd_pref"] +
+		wordAndKey["file_key"] + "(word_of_file, num_of_line) VALUES (?, ?)",
+		wordAndKey["wrd_of_file"], lineCounter)
+	if err != nil {
+		panic(err)
+	}
+}

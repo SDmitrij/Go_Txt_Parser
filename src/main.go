@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
 	paths := getMainFilesInfo("/Go_parser_core/texts/")
 	files := initFileObjects(paths)
 
@@ -25,7 +24,7 @@ func main() {
 		"db_name": "go_parser_core",
 		"tbl_idx": "already_indexed_files",
 		"tbl_str_pref": "strings_of__",
-		"tbl_wrd_pref": "words_of__"}
+		"tbl_wrd_pref": "words_of__" }
 
 	fr := filesRepo{dbTableParams, db}
 	idx := indexing{&files, &fr}
