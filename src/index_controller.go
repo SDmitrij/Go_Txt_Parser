@@ -24,9 +24,19 @@ func (idx *indexing) initFilesInfo() {
 /**
 Indexing current directory files
  */
-func (idx *indexing) indexing() {
-	for _, files := range *idx.filesToIndex {
-		fmt.Println(files)
+func (idx *indexing) indexing(){
+	for _, file := range *idx.filesToIndex {
+		fileStrings, err := file.getAllStringsOfFile(file.filePath)
+		if err != nil {
+			fmt.Printf("There is an error in strings reader on file: %s\n", file.filePath)
+		}
+
+		fmt.Printf("Strings of file %s\n", file.filePath)
+		for i, strFile := range *fileStrings {
+			fmt.Printf("%d. %s", i, strFile)
+
+		}
+
 	}
 }
 

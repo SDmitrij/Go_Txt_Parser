@@ -108,6 +108,18 @@ func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, lineCounter
 	}
 }
 
-func (fr *filesRepo) getFilesInfoAsObj(fileUniqueKey string) File {
-	_, err
+/**
+Get current file info as object
+ */
+func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File {
+	file := File{}
+	row := fr.dbConnection.QueryRow("SELECT file_path, file_unique_key, file_hash, file_size FROM " +
+		fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_idx"] +
+		"WHERE file_unique_key = ?", fileUniqueKey)
+	err := row.Scan(&file.filePath, &file.fileUniqueKey, &file.fileHash, &file.fileSize)
+	if err != nil {
+		panic(err)
+	}
+	return file
 }
+

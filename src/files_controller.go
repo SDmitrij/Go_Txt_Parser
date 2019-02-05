@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/md5"
 	"encoding/hex"
 	"io"
@@ -83,4 +84,26 @@ func getMainFilesInfo(dir string) map[string]int64 {
 	}
 
 	return filesInfo
+}
+
+/**
+Get file content line by line
+ */
+func (f *File) getAllStringsOfFile(filePath string) (*[]string, error) {
+	var lines []string
+	file, err := os.Open(filePath)
+	if err != nil {
+		return &lines, err
+	}
+	defer file.Close()
+	reader := bufio.NewReader(file)
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+		lines = append(lines, line)
+	}
+
+	return &lines, err
 }

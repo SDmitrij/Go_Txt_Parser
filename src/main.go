@@ -16,6 +16,7 @@ func main() {
 	}
 
 	db, err := sql.Open("mysql", "root@tcp(127.0.0.1)/")
+	defer db.Close()
 	if err != nil {
 		panic(err)
 	}
@@ -30,4 +31,5 @@ func main() {
 	idx := indexing{&files, &fr}
 	idx.filesRepo.initFilesRepo()
 	idx.initFilesInfo()
+	idx.indexing()
 }
