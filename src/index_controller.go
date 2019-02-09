@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 )
 
 /**
@@ -24,19 +25,26 @@ func (idx *indexing) initFilesInfo() {
 /**
 Indexing current directory files
  */
-func (idx *indexing) indexing(){
+func (idx *indexing) indexing() {
+	re := regexp.MustCompile(`[A-Za-z']+|[!?,.]`)
 	for _, file := range *idx.filesToIndex {
 		fileStrings, err := file.getAllStringsOfFile(file.filePath)
 		if err != nil {
 			fmt.Printf("There is an error in strings reader on file: %s\n", file.filePath)
 		}
-
+		idx.filesRepo.createTableStrings(file.fileUniqueKey)
+		idx.filesRepo.createTableWordsElem(file.fileUniqueKey)
 		fmt.Printf("Strings of file %s\n", file.filePath)
-		for i, strFile := range *fileStrings {
-			fmt.Printf("%d. %s", i, strFile)
-
+		for lineCounter, strFile := range *fileStrings {
+			fmt.Printf("%d. %s", lineCounter, strFile)
+			var toStringRepo = map[string] string {"file_key": file.fileUniqueKey, "str_of_file": strFile}
+			idx.filesRepo.insIntoTableStrings(toStringRepo, lineCounter)
+			wordsElem := re.FindAllString(strFile, -1)
+			for _, wordElem := range wordsElem {
+				var toWrdElemRepo = map[string] string {"file_key": file.fileUniqueKey, "wrd_elem_of_file": wordElem}
+				idx.filesRepo.insIntoTableWordsElem(toWrdElemRepo, lineCounter)
+			}
 		}
-
 	}
 }
 

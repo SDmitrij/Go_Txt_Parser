@@ -60,7 +60,8 @@ func initFileObjects(filesInfo map[string]int64) []File{
 		uniqueFileKey := getMd5FileUniqueKey(filepath.Base(path))
 		fileSize := size
 		if errFileHash == nil{
-			files = append(files, File{filePath: path, fileUniqueKey: uniqueFileKey, fileHash: filesHash, fileSize: fileSize})
+			files = append(files,
+				File{filePath: path, fileUniqueKey: uniqueFileKey, fileHash: filesHash, fileSize: fileSize})
 		}
 	}
 

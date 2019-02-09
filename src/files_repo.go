@@ -60,13 +60,13 @@ func (fr *filesRepo) createTableStrings(fileUniqueKey string) {
 /**
 Create table that keeps words of file
  */
-func (fr *filesRepo) createTableWords(fileUniqueKey string) {
+func (fr *filesRepo) createTableWordsElem(fileUniqueKey string) {
 	_, err := fr.dbConnection.Exec("CREATE TABLE IF NOT EXISTS " + fr.dbTblParams["db_name"] + "." +
 		fr.dbTblParams["tbl_wrd_pref"] + fileUniqueKey +
 		"(id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY," +
-		"word_of_file VARCHAR(50) NOT NULL," +
+		"word_elem_of_file VARCHAR(50) NOT NULL," +
 		"num_of_line INT(10) NOT NULL," +
-		"INDEX wrd_idx (word_of_file))")
+		"INDEX wrd_idx (word_elem_of_file))")
 	if err != nil {
 		panic(err)
 	}
@@ -99,10 +99,10 @@ func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string,  lineCo
 /**
 Insert data into table with words of current file
  */
-func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, lineCounter int) {
+func (fr *filesRepo) insIntoTableWordsElem(wordAndKey map[string]string, lineCounter int) {
 	_, err := fr.dbConnection.Exec("INSERT INTO " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_wrd_pref"] +
-		wordAndKey["file_key"] + "(word_of_file, num_of_line) VALUES (?, ?)",
-		wordAndKey["wrd_of_file"], lineCounter)
+		wordAndKey["file_key"] + "(word_elem_of_file, num_of_line) VALUES (?, ?)",
+		wordAndKey["wrd_elem_of_file"], lineCounter)
 	if err != nil {
 		panic(err)
 	}
