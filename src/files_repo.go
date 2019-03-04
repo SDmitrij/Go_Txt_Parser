@@ -19,7 +19,7 @@ func (fr *filesRepo) initFilesRepo() {
 Create an entry database
  */
 func (fr *filesRepo) createEntryDatabase() {
-	_, err := fr.dbConnection.Exec("CREATE DATABASE IF NOT EXISTS " + fr.dbTblParams["db_name"])
+	_, err := fr.dbConnection.Exec("CREATE DATABASE IF NOT EXISTS " + fr.dbTblParams["db_name"] + " CHARSET=utf8")
 	if err != nil {
 		panic(err)
 	}
@@ -45,9 +45,9 @@ func (fr *filesRepo) createFilesInfoTable() {
 /**
 Create table that keeps strings of file
  */
-func (fr *filesRepo) createTableStrings(fileUniqueKey string) {
+func (fr *filesRepo) createTableStrings(fileUniqueKey string, tblPref string) {
 	_, err := fr.dbConnection.Exec("CREATE TABLE IF NOT EXISTS " + fr.dbTblParams["db_name"] + "." +
-		fr.dbTblParams["tbl_str_pref"] + fileUniqueKey +
+		fr.dbTblParams[tblPref] + fileUniqueKey +
 		"(id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY," +
 		"string_of_file VARCHAR(200) NOT NULL," +
 		"num_of_line INT(10) NOT NULL," +
@@ -60,13 +60,13 @@ func (fr *filesRepo) createTableStrings(fileUniqueKey string) {
 /**
 Create table that keeps words of file
  */
-func (fr *filesRepo) createTableWordsElem(fileUniqueKey string) {
+func (fr *filesRepo) createTableWords(fileUniqueKey string, tblPref string) {
 	_, err := fr.dbConnection.Exec("CREATE TABLE IF NOT EXISTS " + fr.dbTblParams["db_name"] + "." +
-		fr.dbTblParams["tbl_wrd_pref"] + fileUniqueKey +
+		fr.dbTblParams[tblPref] + fileUniqueKey +
 		"(id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY," +
-		"word_elem_of_file VARCHAR(50) NOT NULL," +
+		"word_of_file VARCHAR(50) NOT NULL," +
 		"num_of_line INT(10) NOT NULL," +
-		"INDEX wrd_idx (word_elem_of_file))")
+		"INDEX wrd_idx (word_of_file))")
 	if err != nil {
 		panic(err)
 	}
@@ -87,8 +87,8 @@ func (fr *filesRepo) insIntoMainInfoFileTable(file File) {
 /**
 Insert data into table with strings of current file
  */
-func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string,  lineCounter int) {
-	_, err := fr.dbConnection.Exec("INSERT INTO "+fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_str_pref"]+
+func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string, tblPref string,  lineCounter int) {
+	_, err := fr.dbConnection.Exec("INSERT INTO "+fr.dbTblParams["db_name"] + "." + fr.dbTblParams[tblPref]+
 		stringAndKey["file_key"] + "(string_of_file, num_of_line) VALUES (?, ?)",
 		stringAndKey["str_of_file"], lineCounter)
 	if err != nil {
@@ -99,10 +99,10 @@ func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string,  lineCo
 /**
 Insert data into table with words of current file
  */
-func (fr *filesRepo) insIntoTableWordsElem(wordAndKey map[string]string, lineCounter int) {
-	_, err := fr.dbConnection.Exec("INSERT INTO " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_wrd_pref"] +
-		wordAndKey["file_key"] + "(word_elem_of_file, num_of_line) VALUES (?, ?)",
-		wordAndKey["wrd_elem_of_file"], lineCounter)
+func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, tblPref string, lineCounter int) {
+	_, err := fr.dbConnection.Exec("INSERT INTO " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams[tblPref] +
+		wordAndKey["file_key"] + "(word_of_file, num_of_line) VALUES (?, ?)",
+		wordAndKey["wrd_of_file"], lineCounter)
 	if err != nil {
 		panic(err)
 	}
@@ -121,5 +121,14 @@ func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File {
 		panic(err)
 	}
 	return file
+}
+
+func (fr *filesRepo) getRandomStringOfFile(fileUniqueKey string, number int) []string {
+	string, _ := fr.dbConnection.Query("SELECT file_str.string_of_file FROM " + fileUniqueKey + " file_str" +
+		"JOIN ( SELECT RAND() * (SELECT MAX(id) FROM " + fileUniqueKey + ") AS max_id ) AS m" +
+		"WHERE file_str.id >= m.max_id" +
+		"ORDER BY file_str.id ASC" +
+		"LIMIT 1")
+
 }
 

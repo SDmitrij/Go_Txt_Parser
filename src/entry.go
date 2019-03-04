@@ -25,11 +25,13 @@ func main() {
 		"db_name": "go_parser_core",
 		"tbl_idx": "already_indexed_files",
 		"tbl_str_pref": "strings_of__",
-		"tbl_wrd_pref": "words_elem_of__" }
+		"tbl_wrd_pref": "words_of__",
+		"tbl_lsa_str_pref": "lsa_strings_of__",
+		"tbl_lsa_wrd_pref": "lsa_words_of__"}
 
 	fr := filesRepo{dbTableParams, db}
 	idx := indexing{&files, &fr}
 	idx.filesRepo.initFilesRepo()
 	idx.initFilesInfo()
-	idx.indexing()
+	idx.trueIndexing()
 }

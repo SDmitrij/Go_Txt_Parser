@@ -90,11 +90,11 @@ func getMainFilesInfo(dir string) map[string]int64 {
 /**
 Get file content line by line
  */
-func (f *File) getAllStringsOfFile(filePath string) (*[]string, error) {
+func (f *File) getAllStringsOfFile(filePath string) *[]string {
 	var lines []string
 	file, err := os.Open(filePath)
 	if err != nil {
-		return &lines, err
+		panic(err)
 	}
 	defer file.Close()
 	reader := bufio.NewReader(file)
@@ -106,5 +106,5 @@ func (f *File) getAllStringsOfFile(filePath string) (*[]string, error) {
 		lines = append(lines, line)
 	}
 
-	return &lines, err
+	return &lines
 }
