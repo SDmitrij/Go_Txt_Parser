@@ -123,6 +123,7 @@ func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File {
 	return file
 }
 
+/*
 func (fr *filesRepo) getRandomStringOfFile(fileUniqueKey string, number int) []string {
 	string, _ := fr.dbConnection.Query("SELECT file_str.string_of_file FROM " + fileUniqueKey + " file_str" +
 		"JOIN ( SELECT RAND() * (SELECT MAX(id) FROM " + fileUniqueKey + ") AS max_id ) AS m" +
@@ -131,4 +132,4 @@ func (fr *filesRepo) getRandomStringOfFile(fileUniqueKey string, number int) []s
 		"LIMIT 1")
 
 }
-
+*/
