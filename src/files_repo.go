@@ -1,6 +1,8 @@
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type filesRepo struct {
 	dbTblParams map[string]string
@@ -111,15 +113,18 @@ func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, tblPref str
 /**
 Get current file info as object
  */
-func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File {
+func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File{
 	file := File{}
-	row := fr.dbConnection.QueryRow("SELECT file_path, file_unique_key, file_hash, file_size FROM " +
+
+	err := fr.dbConnection.QueryRow("SELECT file_path, file_unique_key, file_hash, file_size FROM " +
 		fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_idx"] +
-		"WHERE file_unique_key = ?", fileUniqueKey)
-	err := row.Scan(&file.filePath, &file.fileUniqueKey, &file.fileHash, &file.fileSize)
-	if err != nil {
+		" WHERE file_unique_key = ?", fileUniqueKey).Scan(&file.filePath, &file.fileUniqueKey, &file.fileHash,
+			&file.fileSize)
+
+	if err != nil && err != sql.ErrNoRows {
 		panic(err)
 	}
+
 	return file
 }
 

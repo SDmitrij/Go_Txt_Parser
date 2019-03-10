@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/caneroj1/stemmer"
 	"strings"
 	"unicode"
@@ -19,32 +20,41 @@ Init files main info into table
  */
 func (idx *indexing) initFilesInfo() {
 	for _, file := range *idx.filesToIndex {
-		idx.filesRepo.insIntoMainInfoFileTable(file)
+		// Get previous file data
+		prevFileData := idx.filesRepo.getFileInfoAsObj(file.fileUniqueKey)
+		if (File{}) != prevFileData {
+			if prevFileData.fileHash != file.fileHash && prevFileData.fileSize != file.fileSize {
+				idx.filesRepo.insIntoMainInfoFileTable(file)
+				idx.trueIndexing(file)
+			}
+		} else {
+			idx.filesRepo.insIntoMainInfoFileTable(file)
+			idx.trueIndexing(file)
+		}
+
+		fmt.Printf("File key: %s, file hash: %s, file path: %s, file size: %d\n",
+			file.fileUniqueKey, file.fileHash, file.filePath, file.fileSize)
 	}
 }
 
 /**
 Indexing current directory files
  */
-func (idx *indexing) trueIndexing() {
+func (idx *indexing) trueIndexing(file File) {
+	// Get all strings of current file
+	fileStrings := file.getAllStringsOfFile(file.filePath)
+	idx.filesRepo.createTableStrings(file.fileUniqueKey, "tbl_str_pref")
+	idx.filesRepo.createTableWords(file.fileUniqueKey, "tbl_wrd_pref")
 
-
-	for _, file := range *idx.filesToIndex {
-		// Get all strings of current file
-		fileStrings := file.getAllStringsOfFile(file.filePath)
-		idx.filesRepo.createTableStrings(file.fileUniqueKey, "tbl_str_pref")
-		idx.filesRepo.createTableWords(file.fileUniqueKey, "tbl_wrd_pref")
-
-		// Index strings of file
-		for lineCounter, strFile := range *fileStrings {
-			var toStringRepo = map[string] string {"file_key": file.fileUniqueKey, "str_of_file": strFile}
-			idx.filesRepo.insIntoTableStrings(toStringRepo, "tbl_str_pref", lineCounter)
-			wordsElemStop := idx.removeStopSymbols(strFile)
-			for _, wordElem := range wordsElemStop {
-				stemStopWrd := stemmer.Stem(wordElem)
-				var toWrdRepo = map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": strings.ToLower(stemStopWrd)}
-				idx.filesRepo.insIntoTableWords(toWrdRepo, "tbl_wrd_pref", lineCounter)
-			}
+	// Index strings of file
+	for lineCounter, strFile := range *fileStrings {
+		var toStringRepo = map[string] string {"file_key": file.fileUniqueKey, "str_of_file": strFile}
+		idx.filesRepo.insIntoTableStrings(toStringRepo, "tbl_str_pref", lineCounter)
+		wordsElemStop := idx.removeStopSymbols(strFile)
+		for _, wordElem := range wordsElemStop {
+			stemStopWrd := stemmer.Stem(wordElem)
+			var toWrdRepo = map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": strings.ToLower(stemStopWrd)}
+			idx.filesRepo.insIntoTableWords(toWrdRepo, "tbl_wrd_pref", lineCounter)
 		}
 	}
 }
@@ -78,7 +88,7 @@ func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 		"to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once",
 		"here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other",
 		"some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "can", "will",
-		"just", "don't", "should", "now", "m", "ll", "d", "s"}
+		"just", "don't", "should", "now", "m", "ll", "d", "s", "t"}
 
 	// Anon. func that return difference between two arrays
 	var difference func(a, b []string) []string
