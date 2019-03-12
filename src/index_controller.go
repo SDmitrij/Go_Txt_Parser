@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/caneroj1/stemmer"
 	"strings"
 	"unicode"
@@ -31,9 +30,6 @@ func (idx *indexing) initFilesInfo() {
 			idx.filesRepo.insIntoMainInfoFileTable(file)
 			idx.trueIndexing(file)
 		}
-
-		fmt.Printf("File key: %s, file hash: %s, file path: %s, file size: %d\n",
-			file.fileUniqueKey, file.fileHash, file.filePath, file.fileSize)
 	}
 }
 
@@ -41,26 +37,30 @@ func (idx *indexing) initFilesInfo() {
 Indexing current directory files
  */
 func (idx *indexing) trueIndexing(file File) {
-	// Get all strings of current file
-	fileStrings := file.getAllStringsOfFile(file.filePath)
+
+	// Get all strings and words of current file
+	fileLines := file.getAllStringsOfFile(file.filePath)
+	// Get all words of current file
+	fileWords := idx.prepareWords(fileLines)
+	// Create entry tables for each file
 	idx.filesRepo.createTableStrings(file.fileUniqueKey, "tbl_str_pref")
 	idx.filesRepo.createTableWords(file.fileUniqueKey, "tbl_wrd_pref")
 
 	// Index strings of file
-	for lineCounter, strFile := range *fileStrings {
-		toStringRepo := map[string] string {"file_key": file.fileUniqueKey, "str_of_file": strFile}
-		idx.filesRepo.insIntoTableStrings(toStringRepo, "tbl_str_pref", lineCounter)
-		words := idx.removeStopSymbols(strFile)
-		// Index words
-		for _, word := range words {
-			stemWord := stemmer.Stem(word)
-			toWrdRepo := map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": strings.ToLower(stemWord)}
-			idx.filesRepo.insIntoTableWords(toWrdRepo, "tbl_wrd_pref", lineCounter)
-		}
+	for _, strFile := range *fileLines {
+		toStringRepo := map[string]string{"file_key": file.fileUniqueKey, "str_of_file": strFile}
+		idx.filesRepo.insIntoTableStrings(toStringRepo, "tbl_str_pref")
+	}
+
+	// Index words
+	for _, wordElem := range *fileWords {
+		toWrdRepo := map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": wordElem}
+		idx.filesRepo.insIntoTableWords(toWrdRepo, "tbl_wrd_pref")
 	}
 }
 
 func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
+
 	// Simple list of english stop words
 	stopWords := []string {"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your",
 		"yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its",
@@ -73,11 +73,8 @@ func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 		"some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "can", "will",
 		"just", "don't", "should", "now", "m", "ll", "d", "s", "t"}
 
-	// Anon. func that return difference between two arrays
-	var difference func(a, b []string) []string
-
 	// Fast array diff
-	difference = func(a, b []string) []string {
+    difference := func(a, b []string) []string {
 		mb := make(map[string]bool)
 		var ab []string
 		for _, x := range b {
@@ -92,17 +89,48 @@ func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 		return ab
 	}
 
-	toLow := strings.ToLower(stringOfFile)
-	words := strings.FieldsFunc(toLow, func(c rune) bool {
+	differ := difference(strings.FieldsFunc(strings.ToLower(stringOfFile), func(c rune) bool {
 		return !unicode.IsLetter(c) && !unicode.IsNumber(c)
-	})
-
-	differ := difference(words, stopWords)
+	}), stopWords)
 
 	return differ
 }
 
-func (idx *indexing) prepareWords(stringsOfFile *[]string) *[]string {
+func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
 
-	return &[]string{}
+	var prepare []string
+
+	getStemmedWords := func(words []string) {
+		iterateWords := func() {
+			for _, word := range words {
+				prepare = append(prepare, strings.ToLower(stemmer.Stem(word)))
+			}
+		}
+		iterateWords()
+	}
+
+	// Fast de-duplicator
+	removeDuplicates := func(elements []string) []string {
+		encountered := make(map[string]bool)
+		var result []string
+		// Create a map of all unique elements.
+		for v:= range elements {
+			encountered[elements[v]] = true
+		}
+		// Place all keys from the map into a slice.
+		for key := range encountered {
+			result = append(result, key)
+		}
+
+		return result
+	}
+
+	for _, line := range *fileLines {
+		getStemmedWords(idx.removeStopSymbols(line))
+	}
+
+	preparedWords := removeDuplicates(prepare)
+
+	return &preparedWords
 }
+

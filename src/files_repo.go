@@ -52,7 +52,6 @@ func (fr *filesRepo) createTableStrings(fileUniqueKey string, tblPref string) {
 		fr.dbTblParams[tblPref] + fileUniqueKey +
 		"(id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY," +
 		"string_of_file VARCHAR(200) NOT NULL," +
-		"num_of_line INT(10) NOT NULL," +
 		"INDEX str_idx (string_of_file))")
 	if err != nil {
 		panic(err)
@@ -67,7 +66,6 @@ func (fr *filesRepo) createTableWords(fileUniqueKey string, tblPref string) {
 		fr.dbTblParams[tblPref] + fileUniqueKey +
 		"(id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY," +
 		"word_of_file VARCHAR(50) NOT NULL," +
-		"num_of_line INT(10) NOT NULL," +
 		"INDEX wrd_idx (word_of_file))")
 	if err != nil {
 		panic(err)
@@ -89,10 +87,10 @@ func (fr *filesRepo) insIntoMainInfoFileTable(file File) {
 /**
 Insert data into table with strings of current file
  */
-func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string, tblPref string,  lineCounter int) {
+func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string, tblPref string) {
 	_, err := fr.dbConnection.Exec("INSERT INTO "+fr.dbTblParams["db_name"] + "." + fr.dbTblParams[tblPref]+
-		stringAndKey["file_key"] + "(string_of_file, num_of_line) VALUES (?, ?)",
-		stringAndKey["str_of_file"], lineCounter)
+		stringAndKey["file_key"] + "(string_of_file) VALUES (?)",
+		stringAndKey["str_of_file"])
 	if err != nil {
 		panic(err)
 	}
@@ -101,10 +99,10 @@ func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string, tblPref
 /**
 Insert data into table with words of current file
  */
-func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, tblPref string, lineCounter int) {
+func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, tblPref string) {
 	_, err := fr.dbConnection.Exec("INSERT INTO " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams[tblPref] +
-		wordAndKey["file_key"] + "(word_of_file, num_of_line) VALUES (?, ?)",
-		wordAndKey["wrd_of_file"], lineCounter)
+		wordAndKey["file_key"] + "(word_of_file) VALUES (?)",
+		wordAndKey["wrd_of_file"])
 	if err != nil {
 		panic(err)
 	}
@@ -128,7 +126,9 @@ func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File{
 	return file
 }
 
+/*
 func (fr *filesRepo) getAllWordsOfCurFile(fileUniqueKey string) *[]string {
 	var wordsOfFile []string
 	rows, err := fr.dbConnection.Query("SELECT ")
 }
+*/
