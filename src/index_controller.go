@@ -48,33 +48,16 @@ func (idx *indexing) trueIndexing(file File) {
 
 	// Index strings of file
 	for lineCounter, strFile := range *fileStrings {
-		var toStringRepo = map[string] string {"file_key": file.fileUniqueKey, "str_of_file": strFile}
+		toStringRepo := map[string] string {"file_key": file.fileUniqueKey, "str_of_file": strFile}
 		idx.filesRepo.insIntoTableStrings(toStringRepo, "tbl_str_pref", lineCounter)
-		wordsElemStop := idx.removeStopSymbols(strFile)
-		for _, wordElem := range wordsElemStop {
-			stemStopWrd := stemmer.Stem(wordElem)
-			var toWrdRepo = map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": strings.ToLower(stemStopWrd)}
+		words := idx.removeStopSymbols(strFile)
+		// Index words
+		for _, word := range words {
+			stemWord := stemmer.Stem(word)
+			toWrdRepo := map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": strings.ToLower(stemWord)}
 			idx.filesRepo.insIntoTableWords(toWrdRepo, "tbl_wrd_pref", lineCounter)
 		}
 	}
-}
-
-func (idx *indexing) lsaIndexing() {
-
-}
-
-/**
-Search all matches and get results
- */
-func (idx *indexing) searching() {
-
-}
-
-/**
-Exclude or include files to index
- */
-func (idx *indexing) excludeOrIncludeFiles() {
-
 }
 
 func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
@@ -117,4 +100,9 @@ func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 	differ := difference(words, stopWords)
 
 	return differ
+}
+
+func (idx *indexing) prepareWords(stringsOfFile *[]string) *[]string {
+
+	return &[]string{}
 }

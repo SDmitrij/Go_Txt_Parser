@@ -115,12 +115,12 @@ Get current file info as object
  */
 func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File{
 	file := File{}
-
+	// Getting current file
 	err := fr.dbConnection.QueryRow("SELECT file_path, file_unique_key, file_hash, file_size FROM " +
 		fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_idx"] +
 		" WHERE file_unique_key = ?", fileUniqueKey).Scan(&file.filePath, &file.fileUniqueKey, &file.fileHash,
 			&file.fileSize)
-
+	// Handling error
 	if err != nil && err != sql.ErrNoRows {
 		panic(err)
 	}
@@ -128,13 +128,7 @@ func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File{
 	return file
 }
 
-/*
-func (fr *filesRepo) getRandomStringOfFile(fileUniqueKey string, number int) []string {
-	string, _ := fr.dbConnection.Query("SELECT file_str.string_of_file FROM " + fileUniqueKey + " file_str" +
-		"JOIN ( SELECT RAND() * (SELECT MAX(id) FROM " + fileUniqueKey + ") AS max_id ) AS m" +
-		"WHERE file_str.id >= m.max_id" +
-		"ORDER BY file_str.id ASC" +
-		"LIMIT 1")
-
+func (fr *filesRepo) getAllWordsOfCurFile(fileUniqueKey string) *[]string {
+	var wordsOfFile []string
+	rows, err := fr.dbConnection.Query("SELECT ")
 }
-*/
