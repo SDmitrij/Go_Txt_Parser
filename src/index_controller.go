@@ -77,6 +77,7 @@ func (idx *indexing) excludeOrIncludeFiles() {
 
 }
 
+
 func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 	// Simple list of english stop words
 	stopWords := []string {"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your",
@@ -89,12 +90,9 @@ func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 		"here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other",
 		"some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "can", "will",
 		"just", "don't", "should", "now", "m", "ll", "d", "s", "t"}
-
-	// Anon. func that return difference between two arrays
-	var difference func(a, b []string) []string
-
+    
 	// Fast array diff
-	difference = func(a, b []string) []string {
+    difference := func(a, b []string) []string {
 		mb := make(map[string]bool)
 		var ab []string
 		for _, x := range b {
@@ -108,13 +106,10 @@ func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 
 		return ab
 	}
-
-	toLow := strings.ToLower(stringOfFile)
-	words := strings.FieldsFunc(toLow, func(c rune) bool {
+    
+	differ := difference(strings.FieldsFunc(strings.ToLower(stringOfFile), func(c rune) bool {
 		return !unicode.IsLetter(c) && !unicode.IsNumber(c)
-	})
-
-	differ := difference(words, stopWords)
+	}), stopWords)
 
 	return differ
 }
