@@ -23,6 +23,7 @@ func (idx *indexing) initFilesInfo() {
 		prevFileData := idx.filesRepo.getFileInfoAsObj(file.fileUniqueKey)
 		if (File{}) != prevFileData {
 			if prevFileData.fileHash != file.fileHash && prevFileData.fileSize != file.fileSize {
+				idx.filesRepo.deleteFileInfo(file.fileUniqueKey)
 				idx.filesRepo.insIntoMainInfoFileTable(file)
 				idx.trueIndexing(file)
 			}

@@ -72,6 +72,22 @@ func (fr *filesRepo) createTableWords(fileUniqueKey string, tblPref string) {
 	}
 }
 
+func (fr *filesRepo) deleteFileInfo(fileUniqueKey string) {
+
+	sqlDelete := "DELETE FROM " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_idx"] +
+		" WHERE file_unique_key = ?;"
+	sqlDelete += "DROP TABLE IF EXISTS " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_str_pref"] +
+		fileUniqueKey + ";"
+	sqlDelete += "DROP TABLE IF EXISTS " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_wrd_pref"] +
+		fileUniqueKey + ";"
+
+	_, err := fr.dbConnection.Exec(sqlDelete, fileUniqueKey)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
 /**
 Insert file's data into main info table
  */
@@ -88,7 +104,7 @@ func (fr *filesRepo) insIntoMainInfoFileTable(file File) {
 Insert data into table with strings of current file
  */
 func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string, tblPref string) {
-	_, err := fr.dbConnection.Exec("INSERT INTO "+fr.dbTblParams["db_name"] + "." + fr.dbTblParams[tblPref]+
+	_, err := fr.dbConnection.Exec("INSERT INTO " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams[tblPref] +
 		stringAndKey["file_key"] + "(string_of_file) VALUES (?)",
 		stringAndKey["str_of_file"])
 	if err != nil {
