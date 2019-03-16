@@ -25,4 +25,5 @@ func main() {
 	idx := indexing{&files, &fr}
 	idx.filesRepo.initFilesRepo()
 	idx.initFilesInfo()
+	idx.getTheWholeListOfTerms()
 }

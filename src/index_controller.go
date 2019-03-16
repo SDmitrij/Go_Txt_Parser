@@ -135,3 +135,9 @@ func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
 	return &preparedWords
 }
 
+func (idx *indexing) getTheWholeListOfTerms() {
+	for _, file := range *idx.filesToIndex {
+		idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref")
+	}
+}
+

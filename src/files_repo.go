@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type filesRepo struct {
@@ -127,7 +128,7 @@ func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, tblPref str
 /**
 Get current file info as object
  */
-func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File{
+func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File {
 	file := File{}
 	// Getting current file
 	err := fr.dbConnection.QueryRow("SELECT file_path, file_unique_key, file_hash, file_size FROM " +
@@ -142,9 +143,32 @@ func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File{
 	return file
 }
 
-/*
-func (fr *filesRepo) getAllWordsOfCurFile(fileUniqueKey string) *[]string {
-	var wordsOfFile []string
-	rows, err := fr.dbConnection.Query("SELECT ")
+/**
+Get all terms of current file
+ */
+func (fr *filesRepo) getAllTermsOfFile(fileUniqueKey string, tblPref string) {
+
+	var terms []string
+
+	rawRes := make([][]byte, 1)
+	temp := make([]interface{}, 1)
+	temp[0] = &rawRes[0]
+
+	result, err := fr.dbConnection.Query("SELECT word_of_file FROM "+ fr.dbTblParams["db_name"] + "." +
+		fr.dbTblParams[tblPref] + fileUniqueKey)
+
+	if err != nil {
+		panic(err)
+	}
+
+	for result.Next() {
+		err := result.Scan(temp...)
+		if err != nil {
+			panic(err)
+		}
+
+		terms = append(terms, string(rawRes[0]))
+	}
+
+	fmt.Println(terms)
 }
-*/
