@@ -26,4 +26,6 @@ func main() {
 	idx.filesRepo.initFilesRepo()
 	idx.initFilesInfo()
 	idx.getTheWholeListOfTerms()
+	lsa := latentSemanticAnalysis{&files, &fr, &idx}
+	lsa.setFrequencyMatrix()
 }

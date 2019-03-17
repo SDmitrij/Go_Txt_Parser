@@ -135,9 +135,14 @@ func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
 	return &preparedWords
 }
 
-func (idx *indexing) getTheWholeListOfTerms() {
+func (idx *indexing) getTheWholeListOfTerms() *[][]string {
+
+	var termList [][]string
+
 	for _, file := range *idx.filesToIndex {
-		idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref")
+		termList = append(termList, *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref"))
 	}
+
+	return &termList
 }
 

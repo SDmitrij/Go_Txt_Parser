@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 )
 
 type filesRepo struct {
@@ -146,7 +145,7 @@ func (fr *filesRepo) getFileInfoAsObj(fileUniqueKey string) File {
 /**
 Get all terms of current file
  */
-func (fr *filesRepo) getAllTermsOfFile(fileUniqueKey string, tblPref string) {
+func (fr *filesRepo) getAllTermsOfFile(fileUniqueKey string, tblPref string) *[]string {
 
 	var terms []string
 
@@ -170,5 +169,5 @@ func (fr *filesRepo) getAllTermsOfFile(fileUniqueKey string, tblPref string) {
 		terms = append(terms, string(rawRes[0]))
 	}
 
-	fmt.Println(terms)
+	return &terms
 }
