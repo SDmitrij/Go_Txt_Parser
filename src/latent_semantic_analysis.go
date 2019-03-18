@@ -18,7 +18,7 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) *map[strin
 		for _, fileTerm := range *filesTerms {
 			for _, term := range fileTerm {
 				if matchTerm == term {
-					tmpMatchVec[iter] += 1
+					tmpMatchVec[iter]++
 				}
 			}
 			iter++
