@@ -14,7 +14,7 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) *map[strin
 	// Fill array of vectors that contains term's matches in docs
 	searchMatchesVectors := func (matchTerm string) {
 		tmpMatchVec := make([]int, len(*filesTerms))
-		iter := 0
+		var iter int
 		for _, fileTerm := range *filesTerms {
 			for _, term := range fileTerm {
 				if matchTerm == term {
