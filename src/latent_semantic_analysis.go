@@ -2,10 +2,24 @@ package main
 
 type latentSemanticAnalysis struct {
 	files *[] File
-	repository *filesRepo
 	indexer *indexing
 }
 
+type frequencyMatrix struct {
+	frequencyMatrixVectors map[string][]int
+	tFIdf map[string][]int
+	lsa latentSemanticAnalysis
+}
+
+func (lsa *latentSemanticAnalysis) invokeLsa() {
+	fm := frequencyMatrix{*lsa.setFrequencyMatrix(true), make(map[string][]int),
+		*lsa }
+	fm.setTfIdf()
+}
+
+/**
+Set frequency matrix
+ */
 func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) *map[string][]int {
 
 	filesTerms := lsa.indexer.getTheWholeListOfTerms()
@@ -54,6 +68,19 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) *map[strin
 	}
 
 	return &termVectors
+}
+
+func (fm *frequencyMatrix) setTfIdf() {
+
+	vecToTfIdf := func(vector *[]int) {
+
+	}
+
+	for _, fileTerms := range fm.frequencyMatrixVectors {
+		for _, termsVector := range fileTerms {
+
+		}
+	}
 }
 
 
