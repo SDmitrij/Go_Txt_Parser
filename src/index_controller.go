@@ -18,6 +18,7 @@ type indexing struct {
 Init files main info into table
  */
 func (idx *indexing) initFilesInfo() {
+
 	for _, file := range *idx.filesToIndex {
 		// Get previous file data
 		prevFileData := idx.filesRepo.getFileInfoAsObj(file.fileUniqueKey)
@@ -32,6 +33,7 @@ func (idx *indexing) initFilesInfo() {
 			idx.trueIndexing(file)
 		}
 	}
+
 }
 
 /**
@@ -42,7 +44,7 @@ func (idx *indexing) trueIndexing(file File) {
 	// Get all strings and words of current file
 	fileLines := file.getAllStringsOfFile(file.filePath)
 	// Get all words of current file
-	fileWords := idx.prepareWords(fileLines)
+	fileWords := idx.prepareWords(fileLines, false)
 	// Create entry tables for each file
 	idx.filesRepo.createTableStrings(file.fileUniqueKey, "tbl_str_pref")
 	idx.filesRepo.createTableWords(file.fileUniqueKey, "tbl_wrd_pref")
@@ -58,6 +60,7 @@ func (idx *indexing) trueIndexing(file File) {
 		toWrdRepo := map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": wordElem}
 		idx.filesRepo.insIntoTableWords(toWrdRepo, "tbl_wrd_pref")
 	}
+
 }
 
 func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
@@ -97,7 +100,7 @@ func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 	return differ
 }
 
-func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
+func (idx *indexing) prepareWords(fileLines *[]string, duplicator bool) *[]string {
 
 	var prepare []string
 
@@ -115,7 +118,7 @@ func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
 		encountered := make(map[string]bool)
 		var result []string
 		// Create a map of all unique elements.
-		for v:= range elements {
+		for v := range elements {
 			encountered[elements[v]] = true
 		}
 		// Place all keys from the map into a slice.
@@ -130,19 +133,21 @@ func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
 		getStemmedWords(idx.removeStopSymbols(line))
 	}
 
-	preparedWords := removeDuplicates(prepare)
-
-	return &preparedWords
-}
-
-func (idx *indexing) getTheWholeListOfTerms() *[][]string {
-
-	var termList [][]string
-
-	for _, file := range *idx.filesToIndex {
-		termList = append(termList, *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref"))
+	if duplicator {
+		prepare = removeDuplicates(prepare)
 	}
 
-	return &termList
+	return &prepare
+}
+
+func (idx *indexing) getTheWholeListOfTerms() *map[string][]string {
+
+	allFilesTerms := make(map[string][]string)
+
+	for _, file := range *idx.filesToIndex {
+		allFilesTerms[file.fileUniqueKey] = *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref")
+	}
+
+	return &allFilesTerms
 }
 
