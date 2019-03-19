@@ -1,27 +1,31 @@
 package main
 
+import "math"
+
 type latentSemanticAnalysis struct {
 	files *[] File
 	indexer *indexing
+	fm *frequencyMatrix
 }
 
 type frequencyMatrix struct {
-	frequencyMatrixVectors map[string][]int
+	frequencyMatrixVectors *map[string][]int
+	wordsPerDoc *map[string]int
 	tFIdf map[string][]int
 	lsa latentSemanticAnalysis
 }
 
 func (lsa *latentSemanticAnalysis) invokeLsa() {
-	fm := frequencyMatrix{*lsa.setFrequencyMatrix(true), make(map[string][]int),
-		*lsa }
-	fm.setTfIdf()
+	fm := lsa.setFrequencyMatrix(true)
+	lsa.fm = &fm
 }
 
 /**
 Set frequency matrix
  */
-func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) *map[string][]int {
+func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) frequencyMatrix {
 
+	wordsPerDoc := make(map[string]int)
 	filesTerms := lsa.indexer.getTheWholeListOfTerms()
 	termVectors := make(map[string][]int)
 
@@ -42,7 +46,8 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) *map[strin
 	}
 
 	// Go through array of terms
-	for _, fileTerm := range *filesTerms {
+	for filename, fileTerm := range *filesTerms {
+		wordsPerDoc[filename] = len(fileTerm)
 		for _, term := range fileTerm {
 			searchMatchesVectors(term)
 		}
@@ -67,16 +72,31 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) *map[strin
 		}
 	}
 
-	return &termVectors
+	return frequencyMatrix{&termVectors, &wordsPerDoc, map[string][]int{},
+		*lsa}
 }
 
 func (fm *frequencyMatrix) setTfIdf() {
 
-	vecToTfIdf := func(vector *[]int) {
+	vecToTfIdf := func(arr *[]int, filename string) {
 
+		vector := *arr
+		tfIdfVector := make([]int , len(vector))
+		var nonZeroColumns int
+
+		for _, elem := range vector {
+			if elem != 0 {
+				nonZeroColumns++
+			}
+		}
+
+		for i := 0; i < len(vector); i++ {
+			tfIdfVector[i] =
+				(vector[i] / fm.wordsPerDoc[filename]) * math.Log(float64(len(fm.wordsPerDoc) / nonZeroColumns))
+		}
 	}
 
-	for _, fileTerms := range fm.frequencyMatrixVectors {
+	for filename, fileTerms := range *fm.frequencyMatrixVectors {
 		for _, termsVector := range fileTerms {
 
 		}
