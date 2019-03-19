@@ -1,6 +1,8 @@
 package main
 
-import "math"
+import (
+	"math"
+)
 
 type latentSemanticAnalysis struct {
 	files *[] File
@@ -10,13 +12,14 @@ type latentSemanticAnalysis struct {
 
 type frequencyMatrix struct {
 	frequencyMatrixVectors *map[string][]int
-	wordsPerDoc *map[string]int
-	tFIdf map[string][]int
-	lsa latentSemanticAnalysis
+	wordsPerDoc *[]int
+	tFIdf *[][]float64
+	lsa *latentSemanticAnalysis
 }
 
 func (lsa *latentSemanticAnalysis) invokeLsa() {
 	fm := lsa.setFrequencyMatrix(true)
+	fm.tFIdf = fm.setTfIdf()
 	lsa.fm = &fm
 }
 
@@ -25,7 +28,7 @@ Set frequency matrix
  */
 func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) frequencyMatrix {
 
-	wordsPerDoc := make(map[string]int)
+	var wordsPerDoc []int
 	filesTerms := lsa.indexer.getTheWholeListOfTerms()
 	termVectors := make(map[string][]int)
 
@@ -46,8 +49,8 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) frequencyM
 	}
 
 	// Go through array of terms
-	for filename, fileTerm := range *filesTerms {
-		wordsPerDoc[filename] = len(fileTerm)
+	for _, fileTerm := range *filesTerms {
+		wordsPerDoc = append(wordsPerDoc, len(fileTerm))
 		for _, term := range fileTerm {
 			searchMatchesVectors(term)
 		}
@@ -72,16 +75,20 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) frequencyM
 		}
 	}
 
-	return frequencyMatrix{&termVectors, &wordsPerDoc, map[string][]int{},
-		*lsa}
+	return frequencyMatrix{&termVectors, &wordsPerDoc, &[][]float64{},
+		lsa}
 }
 
-func (fm *frequencyMatrix) setTfIdf() {
+/**
+Set Term Frequency – Inverse Document Frequency matrix
+ */
+func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 
-	vecToTfIdf := func(arr *[]int, filename string) {
+	wordsPerDoc := *fm.wordsPerDoc
+	var tFIdfMatrix [][]float64
 
-		vector := *arr
-		tfIdfVector := make([]int , len(vector))
+	vecToTfIdf := func(vector []int) []float64 {
+		tfIdfVector := make([]float64 , len(vector))
 		var nonZeroColumns int
 
 		for _, elem := range vector {
@@ -91,16 +98,20 @@ func (fm *frequencyMatrix) setTfIdf() {
 		}
 
 		for i := 0; i < len(vector); i++ {
-			tfIdfVector[i] =
-				(vector[i] / fm.wordsPerDoc[filename]) * math.Log(float64(len(fm.wordsPerDoc) / nonZeroColumns))
+			if vector[i] != 0 {
+				tfIdfVector[i] =
+					(float64(vector[i]) / float64(wordsPerDoc[i])) * math.Log(float64(len(wordsPerDoc)) / float64(nonZeroColumns))
+			}
 		}
+
+		return tfIdfVector
 	}
 
-	for filename, fileTerms := range *fm.frequencyMatrixVectors {
-		for _, termsVector := range fileTerms {
-
-		}
+	for _, fVector := range *fm.frequencyMatrixVectors {
+		tFIdfMatrix = append(tFIdfMatrix, vecToTfIdf(fVector))
 	}
+
+	return &tFIdfMatrix
 }
 
 
