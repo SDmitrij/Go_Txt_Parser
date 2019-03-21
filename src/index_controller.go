@@ -14,6 +14,11 @@ type indexing struct {
 	filesRepo *filesRepo
 }
 
+func (idx *indexing) invokeIndexing() {
+	idx.filesRepo.initFilesRepo()
+	idx.initFilesInfo()
+}
+
 /**
 Init files main info into table
  */
@@ -140,6 +145,9 @@ func (idx *indexing) prepareWords(fileLines *[]string, duplicator bool) *[]strin
 	return &prepare
 }
 
+/**
+Get the whole terms list for each file
+ */
 func (idx *indexing) getTheWholeListOfTerms() *map[string][]string {
 
 	allFilesTerms := make(map[string][]string)
@@ -148,6 +156,6 @@ func (idx *indexing) getTheWholeListOfTerms() *map[string][]string {
 		allFilesTerms[file.fileUniqueKey] = *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref")
 	}
 
-	return &allFilesTerms
+	return & allFilesTerms
 }
 

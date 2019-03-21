@@ -23,8 +23,7 @@ func main() {
 
 	fr := filesRepo{dbTableParams, db}
 	idx := indexing{&files, &fr}
-	idx.filesRepo.initFilesRepo()
-	idx.initFilesInfo()
+	idx.invokeIndexing()
 	lsa := latentSemanticAnalysis{&files, &idx, &frequencyMatrix{}}
 	lsa.invokeLsa()
 }

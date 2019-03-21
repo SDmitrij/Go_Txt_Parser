@@ -5,22 +5,23 @@ import (
 )
 
 type latentSemanticAnalysis struct {
-	files *[] File
+	files *[]File
 	indexer *indexing
 	fm *frequencyMatrix
 }
 
 type frequencyMatrix struct {
-	frequencyMatrixVectors *map[string][]int
-	wordsPerDoc *[]int
-	tFIdf *[][]float64
+	frequencyMatrixVectors *map[string]map[string][]int
+	tFIdf *map[string][]float64
 	lsa *latentSemanticAnalysis
 }
 
 func (lsa *latentSemanticAnalysis) invokeLsa() {
 	fm := lsa.setFrequencyMatrix(true)
+	/*
 	fm.tFIdf = fm.setTfIdf()
 	lsa.fm = &fm
+	*/
 }
 
 /**
@@ -28,67 +29,71 @@ Set frequency matrix
  */
 func (lsa *latentSemanticAnalysis) setFrequencyMatrix(lessMatch bool) frequencyMatrix {
 
-	var wordsPerDoc []int
+	// Create multidimensional map that contains file keys, terms and their frequency
+	fMatrix := make(map[string]map[string][]int)
 	filesTerms := lsa.indexer.getTheWholeListOfTerms()
-	termVectors := make(map[string][]int)
 
 	// Fill array of vectors that contains term's matches in docs
-	searchMatchesVectors := func (matchTerm string) {
-		tmpMatchVec := make([]int, len(*filesTerms))
+	searchMatchesVectors := func (matchTerm string) []int{
+		matchVector := make([]int, len(*filesTerms))
 		var iter int
 		for _, fileTerm := range *filesTerms {
 			for _, term := range fileTerm {
 				if matchTerm == term {
-					tmpMatchVec[iter]++
+					matchVector[iter]++
 				}
 			}
 			iter++
 		}
 
-		termVectors[matchTerm] = tmpMatchVec
+		return matchVector
 	}
 
 	// Go through array of terms
-	for _, fileTerm := range *filesTerms {
-		wordsPerDoc = append(wordsPerDoc, len(fileTerm))
+	for fileKey, fileTerm := range *filesTerms {
+		termVectors := make(map[string][]int)
 		for _, term := range fileTerm {
-			searchMatchesVectors(term)
+			termVectors[term] = searchMatchesVectors(term)
 		}
+		fMatrix[fileKey] = termVectors
 	}
 
-	// Remove terms that match less that two times
+	// Remove terms that match less than two times
 	if lessMatch {
-		var unsetVectors []string
-		for vector, termVector := range termVectors {
-			var matcher int
-			for _, termMatch := range termVector {
-				if termMatch != 0 {
-					matcher++
+
+		var unsetVec [][]string
+		for fileUniqueKey, fileTerms := range fMatrix {
+			for term, termVector := range fileTerms {
+				var matcher int
+				for _, vecVal := range termVector {
+					if vecVal != 0 {
+						matcher++
+					}
+				}
+				if matcher == 1 {
+					unsetVec = append(unsetVec, []string{fileUniqueKey, term})
 				}
 			}
-			if matcher == 1 {
-				unsetVectors = append(unsetVectors, vector)
-			}
 		}
-		for _, vecKey := range unsetVectors {
-			delete(termVectors, vecKey)
+
+		for _, unsetInfo := range unsetVec {
+			delete(fMatrix[unsetInfo[0]], unsetInfo[1])
 		}
 	}
 
-	return frequencyMatrix{&termVectors, &wordsPerDoc, &[][]float64{},
-		lsa}
+	return frequencyMatrix{& fMatrix, & map[string][]float64{}, lsa }
 }
 
 /**
 Set Term Frequency – Inverse Document Frequency matrix
  */
-func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
+func (fm *frequencyMatrix) setTfIdf() *map[string][]float64 {
 
-	wordsPerDoc := *fm.wordsPerDoc
-	var tFIdfMatrix [][]float64
+	tFIdfMatrix := make(map[string][]float64)
 
-	vecToTfIdf := func(vector []int) []float64 {
+	vecToTfIdf := func(vector []int, fileUniqueKey string) []float64 {
 		tfIdfVector := make([]float64 , len(vector))
+
 		var nonZeroColumns int
 
 		for _, elem := range vector {
@@ -107,11 +112,18 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 		return tfIdfVector
 	}
 
-	for _, fVector := range *fm.frequencyMatrixVectors {
-		tFIdfMatrix = append(tFIdfMatrix, vecToTfIdf(fVector))
+	for fileUniqueKey, fileTerms := range *fm.frequencyMatrixVectors {
+		//tFIdfMatrix[term] = vecToTfIdf(fVector)
+		for term, termVector := range fileTerms {
+
+		}
 	}
 
-	return &tFIdfMatrix
+	return & tFIdfMatrix
+}
+
+func (fm *frequencyMatrix) setSingularValueDecomposition() {
+
 }
 
 

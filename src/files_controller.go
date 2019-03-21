@@ -106,5 +106,5 @@ func (f *File) getAllStringsOfFile(filePath string) *[]string {
 		lines = append(lines, line)
 	}
 
-	return &lines
+	return & lines
 }
