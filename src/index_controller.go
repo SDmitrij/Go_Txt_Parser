@@ -38,7 +38,6 @@ func (idx *indexing) initFilesInfo() {
 			idx.trueIndexing(file)
 		}
 	}
-
 }
 
 /**
@@ -49,7 +48,7 @@ func (idx *indexing) trueIndexing(file File) {
 	// Get all strings and words of current file
 	fileLines := file.getAllStringsOfFile(file.filePath)
 	// Get all words of current file
-	fileWords := idx.prepareWords(fileLines, false)
+	fileWords := idx.prepareWords(fileLines)
 	// Create entry tables for each file
 	idx.filesRepo.createTableStrings(file.fileUniqueKey, "tbl_str_pref")
 	idx.filesRepo.createTableWords(file.fileUniqueKey, "tbl_wrd_pref")
@@ -65,7 +64,6 @@ func (idx *indexing) trueIndexing(file File) {
 		toWrdRepo := map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": wordElem}
 		idx.filesRepo.insIntoTableWords(toWrdRepo, "tbl_wrd_pref")
 	}
-
 }
 
 func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
@@ -105,7 +103,7 @@ func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
 	return differ
 }
 
-func (idx *indexing) prepareWords(fileLines *[]string, duplicator bool) *[]string {
+func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
 
 	var prepare []string
 
@@ -117,6 +115,21 @@ func (idx *indexing) prepareWords(fileLines *[]string, duplicator bool) *[]strin
 		}
 		iterateWords()
 	}
+
+	for _, line := range *fileLines {
+		getStemmedWords(idx.removeStopSymbols(line))
+	}
+
+	return &prepare
+}
+
+/**
+Get the whole terms list for each file
+ */
+func (idx *indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
+
+	var allFilesTerms [][]string
+	var toUnique []string
 
 	// Fast de-duplicator
 	removeDuplicates := func(elements []string) []string {
@@ -134,28 +147,18 @@ func (idx *indexing) prepareWords(fileLines *[]string, duplicator bool) *[]strin
 		return result
 	}
 
-	for _, line := range *fileLines {
-		getStemmedWords(idx.removeStopSymbols(line))
-	}
-
-	if duplicator {
-		prepare = removeDuplicates(prepare)
-	}
-
-	return &prepare
-}
-
-/**
-Get the whole terms list for each file
- */
-func (idx *indexing) getTheWholeListOfTerms() *map[string][]string {
-
-	allFilesTerms := make(map[string][]string)
-
 	for _, file := range *idx.filesToIndex {
-		allFilesTerms[file.fileUniqueKey] = *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref")
+		allFilesTerms = append(allFilesTerms, *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref"))
 	}
 
-	return & allFilesTerms
+	for _, allFileTerm := range allFilesTerms {
+		for _, term := range allFileTerm {
+			toUnique = append(toUnique, term)
+		}
+	}
+
+	uniqueTerms := removeDuplicates(toUnique)
+
+	return & allFilesTerms, & uniqueTerms
 }
 
