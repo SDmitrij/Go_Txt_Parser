@@ -102,6 +102,11 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 
 func (fm *frequencyMatrix) setSingularValueDecomposition() {
 
+	matPrint := func(X mat.Matrix) {
+		fa := mat.Formatted(X, mat.Prefix(""), mat.Squeeze())
+		fmt.Printf("%v\n", fa)
+	}
+
 	var nDim, mDim, it int
 	var S []float64
 	nDim = len(*fm.tFIdf)
@@ -116,15 +121,21 @@ func (fm *frequencyMatrix) setSingularValueDecomposition() {
 	}
 
 	toSVD := mat.NewDense(nDim, mDim, toSVDVec)
-	U := mat.NewDense(mDim, nDim, []float64{})
-	V := mat.NewDense(mDim, mDim, []float64{})
+	U := mat.NewDense(nDim, mDim, make([]float64, mDim * nDim))
+	V := mat.NewDense(mDim, mDim, make([]float64, mDim * mDim))
 
 	SVD := mat.SVD{}
 	SVD.Factorize(toSVD, mat.SVDThin)
-	fmt.Println(SVD.Values(S))
-	fmt.Println(nDim, mDim)
-	fmt.Println(SVD.VTo(V))
-	fmt.Println(SVD.UTo(U))
+	S = SVD.Values(S)
+	SVD.VTo(V)
+	SVD.UTo(U)
+	fmt.Println(mDim, nDim)
+	fmt.Println("U:")
+	matPrint(U)
+	fmt.Println("V:")
+	matPrint(V)
+	fmt.Println("S:")
+	fmt.Println(S)
 }
 
 
