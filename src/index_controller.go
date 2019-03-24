@@ -66,7 +66,7 @@ func (idx *indexing) trueIndexing(file File) {
 	}
 }
 
-func (idx *indexing) removeStopSymbols(stringOfFile string) []string {
+func (idx * indexing) removeStopSymbols(stringOfFile string) []string {
 
 	// Simple list of english stop words
 	stopWords := []string {"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your",
@@ -126,7 +126,7 @@ func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
 /**
 Get the whole terms list for each file
  */
-func (idx *indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
+func (idx * indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
 
 	var allFilesTerms [][]string
 	var toUnique []string
@@ -159,6 +159,6 @@ func (idx *indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
 
 	uniqueTerms := removeDuplicates(toUnique)
 
-	return & allFilesTerms, & uniqueTerms
+	return &allFilesTerms, &uniqueTerms
 }
 

@@ -151,7 +151,7 @@ func (fr *filesRepo) getAllTermsOfFile(fileUniqueKey string, tblPref string) *[]
 
 	rawRes := make([][]byte, 1)
 	temp := make([]interface{}, 1)
-	temp[0] = &rawRes[0]
+	temp[0] = & rawRes[0]
 
 	result, err := fr.dbConnection.Query("SELECT word_of_file FROM "+ fr.dbTblParams["db_name"] + "." +
 		fr.dbTblParams[tblPref] + fileUniqueKey)

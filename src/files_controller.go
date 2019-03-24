@@ -41,7 +41,7 @@ func getMd5HashOfFile(filePath string) (string, error){
 /**
 Get md 5 unique key of each file
  */
-func getMd5FileUniqueKey(filename string) string{
+func getMd5FileUniqueKey(filename string) string {
 	var md5UniqueKey string
 	hash := md5.New()
 	if _, err := io.WriteString(hash, filename); err != nil {
@@ -53,7 +53,7 @@ func getMd5FileUniqueKey(filename string) string{
 /**
 Init file objects
  */
-func initFileObjects(filesInfo map[string]int64) []File{
+func initFileObjects(filesInfo map[string]int64) []File {
 	var files []File
 	for path, size := range filesInfo {
 		filesHash, errFileHash := getMd5HashOfFile(path)
@@ -106,5 +106,5 @@ func (f *File) getAllStringsOfFile(filePath string) *[]string {
 		lines = append(lines, line)
 	}
 
-	return & lines
+	return &lines
 }

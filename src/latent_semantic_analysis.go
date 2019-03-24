@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"gonum.org/v1/gonum/mat"
 	"math"
 )
 
@@ -20,6 +22,7 @@ type frequencyMatrix struct {
 func (lsa *latentSemanticAnalysis) invokeLsa() {
 	fm := lsa.setFrequencyMatrix()
 	fm.tFIdf = fm.setTfIdf()
+	fm.setSingularValueDecomposition()
 	lsa.fm = &fm
 }
 
@@ -61,7 +64,7 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix() frequencyMatrix {
 		}
 	}
 
-	return frequencyMatrix{& fMatrix, & termsPerFile, & [][]float64{}, lsa }
+	return frequencyMatrix{&fMatrix, &termsPerFile, &[][]float64{}, lsa }
 }
 
 /**
@@ -94,11 +97,34 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 		tFIdfMat = append(tFIdfMat, vecToTfIdf(vector))
 	}
 
-	return & tFIdfMat
+	return &tFIdfMat
 }
 
 func (fm *frequencyMatrix) setSingularValueDecomposition() {
 
+	var nDim, mDim, it int
+	var S []float64
+	nDim = len(*fm.tFIdf)
+	mDim = len((*fm.tFIdf)[0])
+	toSVDVec := make([]float64, nDim * mDim)
+
+	for _, vector := range *fm.tFIdf {
+		for _, elem := range vector {
+			toSVDVec[it] = elem
+			it++
+		}
+	}
+
+	toSVD := mat.NewDense(nDim, mDim, toSVDVec)
+	U := mat.NewDense(mDim, nDim, []float64{})
+	V := mat.NewDense(mDim, mDim, []float64{})
+
+	SVD := mat.SVD{}
+	SVD.Factorize(toSVD, mat.SVDThin)
+	fmt.Println(SVD.Values(S))
+	fmt.Println(nDim, mDim)
+	fmt.Println(SVD.VTo(V))
+	fmt.Println(SVD.UTo(U))
 }
 
 
