@@ -74,7 +74,7 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 
 	var tFIdfMat [][]float64
 
-	vecToTfIdf := func(vector []int) []float64 {
+	vecToTfIdf := func (vector []int) []float64 {
 		tfIdfVector := make([]float64 , len(vector))
 		nonZeroColumns := 0
 
@@ -102,12 +102,13 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 
 func (fm *frequencyMatrix) setSingularValueDecomposition() {
 
-	matPrint := func(X mat.Matrix) {
+	matPrint := func (X mat.Matrix) {
 		fa := mat.Formatted(X, mat.Prefix(""), mat.Squeeze())
 		fmt.Printf("%v\n", fa)
 	}
 
 	var nDim, mDim, it int
+	var minNM float64
 	var S []float64
 	nDim = len(*fm.tFIdf)
 	mDim = len((*fm.tFIdf)[0])
@@ -120,15 +121,22 @@ func (fm *frequencyMatrix) setSingularValueDecomposition() {
 		}
 	}
 
-	toSVD := mat.NewDense(nDim, mDim, toSVDVec)
-	U := mat.NewDense(nDim, mDim, make([]float64, mDim * nDim))
-	V := mat.NewDense(mDim, mDim, make([]float64, mDim * mDim))
-
 	SVD := mat.SVD{}
+	toSVD := mat.NewDense(nDim, mDim, toSVDVec)
+
+	minNM = math.Min(float64(nDim), float64(mDim))
 	SVD.Factorize(toSVD, mat.SVDThin)
+
+	// Left singular vector and right singular vector
+	U := mat.NewDense(nDim, int(minNM), make([]float64, nDim * int(minNM)))
+	V := mat.NewDense(mDim, int(minNM), make([]float64, mDim * int(minNM)))
+
+	// Extract left singular vector and right singular vector, singular values
 	S = SVD.Values(S)
 	SVD.VTo(V)
 	SVD.UTo(U)
+
+	// Print results
 	fmt.Println(mDim, nDim)
 	fmt.Println("U:")
 	matPrint(U)
