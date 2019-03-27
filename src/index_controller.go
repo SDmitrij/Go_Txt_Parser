@@ -10,8 +10,8 @@ import (
 This struct describes indexing process
  */
 type indexing struct {
-	filesToIndex *[]File
-	filesRepo *filesRepo
+	filesToIndex []File
+	filesRepo filesRepo
 }
 
 func (idx *indexing) invokeIndexing() {
@@ -24,7 +24,7 @@ Init files main info into table
  */
 func (idx *indexing) initFilesInfo() {
 
-	for _, file := range *idx.filesToIndex {
+	for _, file := range idx.filesToIndex {
 		// Get previous file data
 		prevFileData := idx.filesRepo.getFileInfoAsObj(file.fileUniqueKey)
 		if (File{}) != prevFileData {
@@ -147,7 +147,7 @@ func (idx * indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
 		return result
 	}
 
-	for _, file := range *idx.filesToIndex {
+	for _, file := range idx.filesToIndex {
 		allFilesTerms = append(allFilesTerms, *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref"))
 	}
 

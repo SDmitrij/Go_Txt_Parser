@@ -22,8 +22,8 @@ func main() {
 		"tbl_wrd_pref": "words_of__"}
 
 	fr := filesRepo{dbTableParams, db}
-	idx := indexing{&files, &fr}
+	idx := indexing{files, fr}
 	idx.invokeIndexing()
-	lsa := latentSemanticAnalysis{&files, &idx, &frequencyMatrix{}}
+	lsa := latentSemanticAnalysis{files, idx, &frequencyMatrix{}}
 	lsa.invokeLsa()
 }

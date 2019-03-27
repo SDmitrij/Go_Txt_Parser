@@ -7,29 +7,37 @@ import (
 )
 
 type latentSemanticAnalysis struct {
-	files *[]File
-	indexer *indexing
+	files []File
+	indexer indexing
 	fm *frequencyMatrix
 }
 
 type frequencyMatrix struct {
 	frequencyMatrixVectors *[][]int
-	termsPerFile *[]int
+	termsPerFile []int
 	tFIdf *[][]float64
+	SVD singularValueDecomposition
+	uniqueTerms *[]string
 	lsa *latentSemanticAnalysis
+}
+
+type singularValueDecomposition struct {
+	U mat.Matrix
+	V mat.Matrix
+	S []float64
 }
 
 func (lsa *latentSemanticAnalysis) invokeLsa() {
 	fm := lsa.setFrequencyMatrix()
 	fm.tFIdf = fm.setTfIdf()
-	fm.setSingularValueDecomposition()
-	lsa.fm = &fm
+	fm.SVD = *fm.setSingularValueDecomposition()
+	lsa.fm = fm
 }
 
 /**
 Set frequency matrix
  */
-func (lsa *latentSemanticAnalysis) setFrequencyMatrix() frequencyMatrix {
+func (lsa *latentSemanticAnalysis) setFrequencyMatrix() *frequencyMatrix {
 
 	var fMatrix [][]int
 	var termsPerFile []int
@@ -64,7 +72,8 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix() frequencyMatrix {
 		}
 	}
 
-	return frequencyMatrix{&fMatrix, &termsPerFile, &[][]float64{}, lsa }
+	return &frequencyMatrix{&fMatrix, termsPerFile, &[][]float64{},
+		singularValueDecomposition{}, uniqueFilesTerms, lsa }
 }
 
 /**
@@ -86,7 +95,7 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 		for i := 0; i < len(vector); i++ {
 			if vector[i] != 0 {
 				tfIdfVector[i] =
-					(float64(vector[i]) / float64((*fm.termsPerFile)[i])) * math.Log(float64(len(*fm.termsPerFile)) / float64(nonZeroColumns))
+					(float64(vector[i]) / float64(fm.termsPerFile[i])) * math.Log(float64(len(fm.termsPerFile)) / float64(nonZeroColumns))
 			}
 		}
 
@@ -100,8 +109,9 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 	return &tFIdfMat
 }
 
-func (fm *frequencyMatrix) setSingularValueDecomposition() {
+func (fm *frequencyMatrix) setSingularValueDecomposition() *singularValueDecomposition {
 
+	// Matrix print
 	matPrint := func (X mat.Matrix) {
 		fa := mat.Formatted(X, mat.Prefix(""), mat.Squeeze())
 		fmt.Printf("%v\n", fa)
@@ -144,6 +154,8 @@ func (fm *frequencyMatrix) setSingularValueDecomposition() {
 	matPrint(V)
 	fmt.Println("S:")
 	fmt.Println(S)
+
+	return &singularValueDecomposition{U, V, S}
 }
 
 
