@@ -30,7 +30,7 @@ type singularValueDecomposition struct {
 func (lsa *latentSemanticAnalysis) invokeLsa() {
 	fm := lsa.setFrequencyMatrix()
 	fm.tFIdf = fm.setTfIdf()
-	fm.SVD = *fm.setSingularValueDecomposition()
+	fm.SVD = *fm.setSingularValueDecomposition(true)
 	lsa.fm = fm
 }
 
@@ -109,7 +109,10 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 	return &tFIdfMat
 }
 
-func (fm *frequencyMatrix) setSingularValueDecomposition() *singularValueDecomposition {
+/**
+Set singular value decomposition according to term frequency – inverse document frequency matrix
+ */
+func (fm *frequencyMatrix) setSingularValueDecomposition(print bool) *singularValueDecomposition {
 
 	// Matrix print
 	matPrint := func (X mat.Matrix) {
@@ -146,16 +149,49 @@ func (fm *frequencyMatrix) setSingularValueDecomposition() *singularValueDecompo
 	SVD.VTo(V)
 	SVD.UTo(U)
 
-	// Print results
-	fmt.Println(mDim, nDim)
-	fmt.Println("U:")
-	matPrint(U)
-	fmt.Println("V:")
-	matPrint(V)
-	fmt.Println("S:")
-	fmt.Println(S)
+	if print {
+		// Print results
+		fmt.Println(mDim, nDim)
+		fmt.Println("U:")
+		matPrint(U)
+		fmt.Println("V:")
+		matPrint(V)
+		fmt.Println("S:")
+		fmt.Println(S)
+	}
 
 	return &singularValueDecomposition{U, V, S}
+}
+
+func (svd *singularValueDecomposition) prepareSvdDataToRender()  {
+
+	setDimImportanceBySingularValues := func() {
+		// Frequency analise param
+		const k = 9
+
+		getMinMaxElem := func() (float64, float64) {
+			min, max := svd.S[0], svd.S[0]
+			for _, e := range svd.S {
+				if e < min {
+					min = e
+				}
+
+				if e > max {
+					max = e
+				}
+			}
+
+			return min, max
+		}
+
+		minS, maxS := getMinMaxElem()
+		spread := maxS - minS
+		h := spread / float64(k)
+
+		for i := 0; i < k; i++ {
+
+		}
+	}
 }
 
 
