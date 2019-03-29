@@ -32,6 +32,7 @@ func (lsa *latentSemanticAnalysis) invokeLsa() {
 	fm.tFIdf = fm.setTfIdf()
 	fm.SVD = *fm.setSingularValueDecomposition(true)
 	lsa.fm = fm
+	fm.SVD.prepareSvdDataToRender()
 }
 
 /**
@@ -163,11 +164,17 @@ func (fm *frequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 	return &singularValueDecomposition{U, V, S}
 }
 
+/**
+Extract data to render lsa plot
+ */
 func (svd *singularValueDecomposition) prepareSvdDataToRender()  {
 
+	// Need to extract the most important two dimensions to draw the lsa plots
 	setDimImportanceBySingularValues := func() {
 		// Frequency analise param
-		const k = 9
+		const
+		( k = 9
+		  n = 2 )
 
 		getMinMaxElem := func() (float64, float64) {
 			min, max := svd.S[0], svd.S[0]
@@ -187,11 +194,28 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender()  {
 		minS, maxS := getMinMaxElem()
 		spread := maxS - minS
 		h := spread / float64(k)
+		intervals := make([][]float64, k)
 
-		for i := 0; i < k; i++ {
-
+		for i := range intervals {
+			intervals[i] = make([]float64, n)
 		}
+
+		current := minS
+		for i := 0; i < k; i++ {
+			for j := 0; j < n; j++ {
+				if j == 0 {
+					intervals[i][j] = current
+				} else {
+					intervals[i][j] = current + h
+					current = intervals[i][j]
+				}
+			}
+		}
+
+		fmt.Println("Frequency intervals:\n", intervals)
 	}
+
+	setDimImportanceBySingularValues()
 }
 
 
