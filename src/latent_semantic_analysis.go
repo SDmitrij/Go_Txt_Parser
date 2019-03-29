@@ -171,7 +171,7 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender()  {
 
 	// Need to extract the most important two dimensions to draw the lsa plots
 	setDimImportanceBySingularValues := func() {
-		// Frequency analise param
+		// Frequency analysis params
 		const
 		( k = 9
 		  n = 2 )
