@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gonum.org/v1/gonum/mat"
 	"math"
+	"math/big"
 )
 
 type latentSemanticAnalysis struct {
@@ -167,14 +168,13 @@ func (fm *frequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 /**
 Extract data to render lsa plot
  */
-func (svd *singularValueDecomposition) prepareSvdDataToRender()  {
+func (svd *singularValueDecomposition) prepareSvdDataToRender() {
 
 	// Need to extract the most important two dimensions to draw the lsa plots
-	setDimImportanceBySingularValues := func() {
+	setDimImportanceBySingularValues := func() []float64 {
 		// Frequency analysis params
-		const
-		( k = 9
-		  n = 2 )
+		const n = 2
+		k := len(svd.S)
 
 		getMinMaxElem := func() (float64, float64) {
 			min, max := svd.S[0], svd.S[0]
@@ -182,7 +182,6 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender()  {
 				if e < min {
 					min = e
 				}
-
 				if e > max {
 					max = e
 				}
@@ -195,6 +194,7 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender()  {
 		spread := maxS - minS
 		h := spread / float64(k)
 		intervals := make([][]float64, k)
+		relativeFrequency := make([]float64, k)
 
 		for i := range intervals {
 			intervals[i] = make([]float64, n)
@@ -212,10 +212,22 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender()  {
 			}
 		}
 
-		fmt.Println("Frequency intervals:\n", intervals)
-	}
+		for _, s := range svd.S {
+			for i := 0; i < k; i++ {
+				// Compare according to float numbers
+				sValToCmp := big.NewFloat(s)
+				firstToCmp := big.NewFloat(intervals[i][0])
+				secondToCmp := big.NewFloat(intervals[i][1])
 
-	setDimImportanceBySingularValues()
+				if sValToCmp.Cmp(firstToCmp) >= 0 && sValToCmp.Cmp(secondToCmp) <= 0 {
+					relativeFrequency[i] += 1
+					relativeFrequency[i] = relativeFrequency[i] / float64(k)
+				}
+			}
+		}
+
+		return relativeFrequency
+	}
 }
 
 
