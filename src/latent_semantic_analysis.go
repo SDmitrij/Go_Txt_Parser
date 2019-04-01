@@ -33,7 +33,8 @@ func (lsa *latentSemanticAnalysis) invokeLsa() {
 	fm.tFIdf = fm.setTfIdf()
 	fm.SVD = *fm.setSingularValueDecomposition(true)
 	lsa.fm = fm
-	fm.SVD.prepareSvdDataToRender()
+	dataToRender := fm.SVD.prepareSvdDataToRender()
+	fm.SVD.createHistSvdSPlot((*dataToRender)["svd_s_val_to_hist"])
 }
 
 /**
@@ -168,12 +169,16 @@ func (fm *frequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 /**
 Extract data to render lsa plot
  */
-func (svd *singularValueDecomposition) prepareSvdDataToRender() {
+func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]float64 {
+
+	const dimToRender int = 3
+	dataToRender := make(map[string][]float64)
+	dimsToRender := make([]int, dimToRender)
 
 	// Need to extract the most important two dimensions to draw the lsa plots
 	setDimImportanceBySingularValues := func() []float64 {
 		// Frequency analysis params
-		const n = 2
+		const n int = 2
 		k := len(svd.S)
 
 		getMinMaxElem := func() (float64, float64) {
@@ -228,6 +233,25 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() {
 
 		return relativeFrequency
 	}
+
+	svdSValImportance := setDimImportanceBySingularValues()
+	tmp := make([]float64, len(svdSValImportance))
+	copy(tmp, svdSValImportance)
+
+	for i := 0; i < dimToRender; i++ {
+		for key, s := range tmp {
+			if s > tmp[0] {
+				dimsToRender[i] = key
+			}
+		}
+		tmp[dimsToRender[i]] = 0.
+	}
+
+	// We throw out first dimension cause' we do not center the matrix
+	firstDim, secondDim := dimsToRender[1], dimsToRender[2]
+
+	dataToRender["svd_s_val_to_hist"] = svdSValImportance
+	return &dataToRender
 }
 
 
