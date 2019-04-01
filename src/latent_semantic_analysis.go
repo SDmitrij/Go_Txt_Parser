@@ -171,14 +171,14 @@ Extract data to render lsa plot
  */
 func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]float64 {
 
-	const dimToRender int = 3
+	const ( dimToRender int = 3
+		    n int = 2 )
 	dataToRender := make(map[string][]float64)
 	dimsToRender := make([]int, dimToRender)
 
 	// Need to extract the most important two dimensions to draw the lsa plots
 	setDimImportanceBySingularValues := func() []float64 {
 		// Frequency analysis params
-		const n int = 2
 		k := len(svd.S)
 
 		getMinMaxElem := func() (float64, float64) {
