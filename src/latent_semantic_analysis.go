@@ -240,17 +240,24 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 
 	for i := 0; i < dimToRender; i++ {
 		for key, s := range tmp {
-			if s > tmp[0] {
+			if big.NewFloat(s).Cmp(big.NewFloat(tmp[0])) > 0 {
 				dimsToRender[i] = key
 			}
 		}
-		tmp[dimsToRender[i]] = 0.
+		tmp[dimsToRender[i]] = float64(0)
 	}
 
 	// We throw out first dimension cause' we do not center the matrix
 	firstDim, secondDim := dimsToRender[1], dimsToRender[2]
+	r, _ := svd.U.Dims()
+	firstDimColU, secondDimColU := make([]float64, r), make([]float64, r)
+	mat.Col(firstDimColU, firstDim, svd.U)
+	mat.Col(secondDimColU, secondDim, svd.U)
 
 	dataToRender["svd_s_val_to_hist"] = svdSValImportance
+	dataToRender["u_first_dim_col"] = firstDimColU
+	dataToRender["u_second_dim_col"] = secondDimColU
+
 	return &dataToRender
 }
 
