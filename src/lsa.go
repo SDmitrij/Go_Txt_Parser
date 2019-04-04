@@ -19,13 +19,13 @@ type frequencyMatrix struct {
 	tFIdf *[][]float64
 	SVD singularValueDecomposition
 	uniqueTerms *[]string
-	lsa *latentSemanticAnalysis
 }
 
 type singularValueDecomposition struct {
 	U mat.Matrix
 	V mat.Matrix
 	S []float64
+	fm *frequencyMatrix
 }
 
 func (lsa *latentSemanticAnalysis) invokeLsa() {
@@ -34,7 +34,10 @@ func (lsa *latentSemanticAnalysis) invokeLsa() {
 	fm.SVD = *fm.setSingularValueDecomposition(true)
 	lsa.fm = fm
 	dataToRender := fm.SVD.prepareSvdDataToRender()
-	fm.SVD.createHistSvdSPlot((*dataToRender)["svd_s_val_to_hist"])
+	fm.SVD.createHistSvdSPlot((*dataToRender)["s_to_hist"])
+	fm.SVD.createTermDocumentDependencyPlot(
+		(*dataToRender)["u_to_X"], (*dataToRender)["u_to_Y"],
+		(*dataToRender)["v_to_X"], (*dataToRender)["v_to_Y"])
 }
 
 /**
@@ -76,7 +79,7 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix() *frequencyMatrix {
 	}
 
 	return &frequencyMatrix{&fMatrix, termsPerFile, &[][]float64{},
-		singularValueDecomposition{}, uniqueFilesTerms, lsa }
+		singularValueDecomposition{}, uniqueFilesTerms}
 }
 
 /**
@@ -163,7 +166,7 @@ func (fm *frequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 		fmt.Println(S)
 	}
 
-	return &singularValueDecomposition{U, V, S}
+	return &singularValueDecomposition{U, V, S, fm}
 }
 
 /**
@@ -249,14 +252,20 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 
 	// We throw out first dimension cause' we do not center the matrix
 	firstDim, secondDim := dimsToRender[1], dimsToRender[2]
-	r, _ := svd.U.Dims()
+	r, c := svd.U.Dims()
 	firstDimColU, secondDimColU := make([]float64, r), make([]float64, r)
 	mat.Col(firstDimColU, firstDim, svd.U)
 	mat.Col(secondDimColU, secondDim, svd.U)
 
-	dataToRender["svd_s_val_to_hist"] = svdSValImportance
-	dataToRender["u_first_dim_col"] = firstDimColU
-	dataToRender["u_second_dim_col"] = secondDimColU
+	firstDimRowV, secondDimRowV := make([]float64, c), make([]float64, c)
+	mat.Row(firstDimRowV, firstDim, svd.V)
+	mat.Row(secondDimRowV, secondDim, svd.V)
+
+	dataToRender["s_to_hist"] = svdSValImportance
+	dataToRender["u_to_X"] = firstDimColU
+	dataToRender["u_to_Y"] = secondDimColU
+	dataToRender["v_to_X"] = firstDimRowV
+	dataToRender["v_to_Y"] = secondDimRowV
 
 	return &dataToRender
 }
