@@ -77,6 +77,7 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(
 	d.Radius = 2 * vg.Millimeter
 	d.Color = color.RGBA{R:0, A:255}
 	p.Add(t, d)
+	p.Legend.Padding = 2 * vg.Millimeter
 	p.Legend.Add("term", t)
 	p.Legend.Add("document", d)
 
