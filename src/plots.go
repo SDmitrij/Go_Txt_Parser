@@ -42,16 +42,14 @@ func (svd *singularValueDecomposition) createHistSvdSPlot(data []float64) {
 func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(
 	uToX, uToY, vToX, vToY []float64) {
 
-	uToPts := make(plotter.XYs, len(uToX))
-	for i := range uToPts {
-		uToPts[i].X = uToX[i]
-		uToPts[i].Y = uToY[i]
-	}
+	createPoints := func(x, y []float64) plotter.XYs {
+		points := make(plotter.XYs, len(x))
+		for i := range points {
+			points[i].X = x[i]
+			points[i].Y = y[i]
+		}
 
-	vToPts := make(plotter.XYs, len(vToX))
-	for i := range vToPts {
-		vToPts[i].X = vToX[i]
-		vToPts[i].Y = vToY[i]
+		return points
 	}
 
 	p, err := plot.New()
@@ -63,22 +61,24 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(
 	p.X.Label.Text = "First dimension"
 	p.Y.Label.Text = "Second dimension"
 
-	t, err := plotter.NewScatter(uToPts)
+	t, err := plotter.NewScatter(createPoints(uToX, uToY))
 	if err != nil {
 		panic(err)
 	}
-	t.GlyphStyle.Shape = draw.CircleGlyph{}
+	t.GlyphStyle.Shape = draw.RingGlyph{}
 	t.Radius = 2 * vg.Millimeter
 	t.Color = color.RGBA{R: 255, A:255}
 
-	d, err := plotter.NewScatter(vToPts)
+	d, err := plotter.NewScatter(createPoints(vToX, vToY))
 	if err != nil {
 		panic(err)
 	}
 	d.GlyphStyle.Shape = draw.PyramidGlyph{}
-	d.Radius = 3 * vg.Millimeter
+	d.Radius = 2 * vg.Millimeter
 	d.Color = color.RGBA{R:0, A:255}
 	p.Add(t, d)
+	p.Legend.Add("term", t)
+	p.Legend.Add("document", d)
 
 	// Save the plot to a PNG file.
 	if err := p.Save(6 * vg.Inch, 6 * vg.Inch, "term_doc_dependence.png"); err != nil {
