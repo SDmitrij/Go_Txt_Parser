@@ -42,6 +42,7 @@ func (lsa *latentSemanticAnalysis) invokeLsa() {
 
 /**
 Set frequency matrix
+TODO remove slices to consume memory usage
  */
 func (lsa *latentSemanticAnalysis) setFrequencyMatrix() *frequencyMatrix {
 
@@ -84,6 +85,7 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix() *frequencyMatrix {
 
 /**
 Set Term Frequency – Inverse Document Frequency matrix
+TODO remove slices to consume memory usage
  */
 func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 
