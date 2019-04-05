@@ -17,10 +17,10 @@ func main() {
 	defer db.Close()
 
 	dbTableParams := map[string]string {
-		"db_name": "go_parser_core",
+		"db_name": "go_latent_semantic_analysis",
 		"tbl_idx": "already_indexed_files",
 		"tbl_str_pref": "strings_of__",
-		"tbl_wrd_pref": "words_of__"}
+		"tbl_term_pref": "terms_of__"}
 
 	fr := filesRepo{dbTableParams, db}
 	idx := indexing{files, fr}

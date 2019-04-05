@@ -48,10 +48,10 @@ func (idx *indexing) trueIndexing(file File) {
 	// Get all strings and words of current file
 	fileLines := file.getAllStringsOfFile(file.filePath)
 	// Get all words of current file
-	fileWords := idx.prepareWords(fileLines)
+	fileTerms := idx.prepareWords(fileLines)
 	// Create entry tables for each file
 	idx.filesRepo.createTableStrings(file.fileUniqueKey, "tbl_str_pref")
-	idx.filesRepo.createTableWords(file.fileUniqueKey, "tbl_wrd_pref")
+	idx.filesRepo.createTableTerms(file.fileUniqueKey, "tbl_term_pref")
 
 	// Index strings of file
 	for _, strFile := range *fileLines {
@@ -60,9 +60,9 @@ func (idx *indexing) trueIndexing(file File) {
 	}
 
 	// Index words
-	for _, wordElem := range *fileWords {
-		toWrdRepo := map[string] string {"file_key": file.fileUniqueKey, "wrd_of_file": wordElem}
-		idx.filesRepo.insIntoTableWords(toWrdRepo, "tbl_wrd_pref")
+	for _, term := range *fileTerms {
+		toTermRepo := map[string] string {"file_key": file.fileUniqueKey, "term_of_file": term}
+		idx.filesRepo.insIntoTableTerms(toTermRepo, "tbl_term_pref")
 	}
 }
 
@@ -148,7 +148,7 @@ func (idx * indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
 	}
 
 	for _, file := range idx.filesToIndex {
-		allFilesTerms = append(allFilesTerms, *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_wrd_pref"))
+		allFilesTerms = append(allFilesTerms, *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_term_pref"))
 	}
 
 	for _, allFileTerm := range allFilesTerms {

@@ -61,12 +61,12 @@ func (fr *filesRepo) createTableStrings(fileUniqueKey string, tblPref string) {
 /**
 Create table that keeps words of file
  */
-func (fr *filesRepo) createTableWords(fileUniqueKey string, tblPref string) {
+func (fr *filesRepo) createTableTerms(fileUniqueKey string, tblPref string) {
 	_, err := fr.dbConnection.Exec("CREATE TABLE IF NOT EXISTS " + fr.dbTblParams["db_name"] + "." +
 		fr.dbTblParams[tblPref] + fileUniqueKey +
 		"(id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY," +
-		"word_of_file VARCHAR(50) NOT NULL," +
-		"INDEX wrd_idx (word_of_file))")
+		"term_of_file VARCHAR(50) NOT NULL," +
+		"INDEX term_idx (term_of_file))")
 	if err != nil {
 		panic(err)
 	}
@@ -78,7 +78,7 @@ func (fr *filesRepo) deleteFileInfo(fileUniqueKey string) {
 		" WHERE file_unique_key = ?;"
 	sqlDelete += "DROP TABLE IF EXISTS " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_str_pref"] +
 		fileUniqueKey + ";"
-	sqlDelete += "DROP TABLE IF EXISTS " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_wrd_pref"] +
+	sqlDelete += "DROP TABLE IF EXISTS " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams["tbl_term_pref"] +
 		fileUniqueKey + ";"
 
 	_, err := fr.dbConnection.Exec(sqlDelete, fileUniqueKey)
@@ -115,10 +115,10 @@ func (fr *filesRepo) insIntoTableStrings(stringAndKey map[string]string, tblPref
 /**
 Insert data into table with words of current file
  */
-func (fr *filesRepo) insIntoTableWords(wordAndKey map[string]string, tblPref string) {
+func (fr *filesRepo) insIntoTableTerms(termAndKey map[string]string, tblPref string) {
 	_, err := fr.dbConnection.Exec("INSERT INTO " + fr.dbTblParams["db_name"] + "." + fr.dbTblParams[tblPref] +
-		wordAndKey["file_key"] + "(word_of_file) VALUES (?)",
-		wordAndKey["wrd_of_file"])
+		termAndKey["file_key"] + "(term_of_file) VALUES (?)",
+		termAndKey["term_of_file"])
 	if err != nil {
 		panic(err)
 	}
@@ -153,7 +153,7 @@ func (fr *filesRepo) getAllTermsOfFile(fileUniqueKey string, tblPref string) *[]
 	temp := make([]interface{}, 1)
 	temp[0] = & rawRes[0]
 
-	result, err := fr.dbConnection.Query("SELECT word_of_file FROM "+ fr.dbTblParams["db_name"] + "." +
+	result, err := fr.dbConnection.Query("SELECT term_of_file FROM "+ fr.dbTblParams["db_name"] + "." +
 		fr.dbTblParams[tblPref] + fileUniqueKey)
 
 	if err != nil {
