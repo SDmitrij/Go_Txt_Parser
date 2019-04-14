@@ -16,13 +16,13 @@ type File struct {
 	filePath string
 	fileUniqueKey string
 	fileHash string
-	fileSize int64
+	fileSize int
 }
 
 /**
 Get md 5 hash of each file
  */
-func getMd5HashOfFile(filePath string) (string, error){
+func getMdFiveHashOfFile(filePath string) (string, error){
 	var mdFiveHash string
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -43,11 +43,11 @@ func getMd5HashOfFile(filePath string) (string, error){
 /**
 Get md 5 unique key of each file
  */
-func getMd5FileUniqueKey(filename string) string {
-	var md5UniqueKey string
+func getMdFiveFileUniqueKey(filename string) string {
+	var mdFiveUniqueKey string
 	hash := md5.New()
 	if _, err := io.WriteString(hash, filename); err != nil {
-		return md5UniqueKey
+		return mdFiveUniqueKey
 	}
 	return hex.EncodeToString(hash.Sum(nil)[:16])
 }
@@ -58,12 +58,12 @@ Init file objects
 func InitFileObjects(filesInfo map[string]int64) []File {
 	var files []File
 	for path, size := range filesInfo {
-		filesHash, errFileHash := getMd5HashOfFile(path)
-		uniqueFileKey := getMd5FileUniqueKey(filepath.Base(path))
+		filesHash, errFileHash := getMdFiveHashOfFile(path)
+		uniqueFileKey := getMdFiveFileUniqueKey(filepath.Base(path))
 		fileSize := size
 		if errFileHash == nil{
 			files = append(files,
-				File{filePath: path, fileUniqueKey: uniqueFileKey, fileHash: filesHash, fileSize: fileSize})
+				File{filePath: path, fileUniqueKey: uniqueFileKey, fileHash: filesHash, fileSize: int(fileSize)})
 		}
 	}
 
