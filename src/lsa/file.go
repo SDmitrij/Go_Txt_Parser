@@ -1,4 +1,4 @@
-package main
+package lsa
 
 import (
 	"bufio"
@@ -23,19 +23,21 @@ type File struct {
 Get md 5 hash of each file
  */
 func getMd5HashOfFile(filePath string) (string, error){
-	var retMd5Value string
+	var mdFiveHash string
 	file, err := os.Open(filePath)
 	if err != nil {
-		return retMd5Value, err
+		return mdFiveHash, err
 	}
 	defer file.Close()
+
 	hash := md5.New()
 	if _, err := io.Copy(hash, file); err != nil {
-		return retMd5Value, err
+		return mdFiveHash, err
 	}
 	hashInBytes := hash.Sum(nil)[:16]
-	retMd5Value = hex.EncodeToString(hashInBytes)
-	return retMd5Value, err
+	mdFiveHash = hex.EncodeToString(hashInBytes)
+
+	return mdFiveHash, err
 }
 
 /**
@@ -53,7 +55,7 @@ func getMd5FileUniqueKey(filename string) string {
 /**
 Init file objects
  */
-func initFileObjects(filesInfo map[string]int64) []File {
+func InitFileObjects(filesInfo map[string]int64) []File {
 	var files []File
 	for path, size := range filesInfo {
 		filesHash, errFileHash := getMd5HashOfFile(path)
@@ -71,7 +73,7 @@ func initFileObjects(filesInfo map[string]int64) []File {
 /**
 Read folder with texts to index and get file's size and path
  */
-func getMainFilesInfo(dir string) map[string]int64 {
+func GetMainFilesInfo(dir string) map[string]int64 {
 	var filesInfo = make(map[string]int64)
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -97,6 +99,7 @@ func (f *File) getAllStringsOfFile(filePath string) *[]string {
 		panic(err)
 	}
 	defer file.Close()
+
 	reader := bufio.NewReader(file)
 	for {
 		line, err := reader.ReadString('\n')

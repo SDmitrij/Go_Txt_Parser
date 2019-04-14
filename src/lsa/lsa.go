@@ -1,4 +1,4 @@
-package main
+package lsa
 
 import (
 	"fmt"
@@ -7,13 +7,15 @@ import (
 	"math/big"
 )
 
-type latentSemanticAnalysis struct {
-	files []File
-	indexer indexing
-	fm *frequencyMatrix
+const ( dimToRender int = 3
+		N           int = 2 )
+
+type LatentSemanticAnalysis struct {
+	Indexer Indexing
+	Fm      *FrequencyMatrix
 }
 
-type frequencyMatrix struct {
+type FrequencyMatrix struct {
 	frequencyMatrixVectors *[][]int
 	termsPerFile []int
 	tFIdf *[][]float64
@@ -25,14 +27,14 @@ type singularValueDecomposition struct {
 	U mat.Matrix
 	V mat.Matrix
 	S []float64
-	fm *frequencyMatrix
+	fm *FrequencyMatrix
 }
 
-func (lsa *latentSemanticAnalysis) invokeLsa() {
+func (lsa *LatentSemanticAnalysis) InvokeLsa() {
 	fm := lsa.setFrequencyMatrix()
 	fm.tFIdf = fm.setTfIdf()
 	fm.SVD = *fm.setSingularValueDecomposition(true)
-	lsa.fm = fm
+	lsa.Fm = fm
 	dataToRender := fm.SVD.prepareSvdDataToRender()
 	fm.SVD.createHistSvdSPlot((*dataToRender)["s_to_hist"])
 	fm.SVD.createTermDocumentDependencyPlot(
@@ -44,11 +46,11 @@ func (lsa *latentSemanticAnalysis) invokeLsa() {
 Set frequency matrix
 TODO remove slices to consume memory usage
  */
-func (lsa *latentSemanticAnalysis) setFrequencyMatrix() *frequencyMatrix {
+func (lsa *LatentSemanticAnalysis) setFrequencyMatrix() *FrequencyMatrix {
 
 	var fMatrix [][]int
 	var termsPerFile []int
-	filesTerms, uniqueFilesTerms := lsa.indexer.getTheWholeListOfTerms()
+	filesTerms, uniqueFilesTerms := lsa.Indexer.getTheWholeListOfTerms()
 
 	// Fill array of vectors that contains term's matches in docs
 	createTermFrequencyVec := func (matchTerm string) []int {
@@ -79,7 +81,7 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix() *frequencyMatrix {
 		}
 	}
 
-	return &frequencyMatrix{&fMatrix, termsPerFile, &[][]float64{},
+	return &FrequencyMatrix{&fMatrix, termsPerFile, &[][]float64{},
 		singularValueDecomposition{}, uniqueFilesTerms}
 }
 
@@ -87,7 +89,7 @@ func (lsa *latentSemanticAnalysis) setFrequencyMatrix() *frequencyMatrix {
 Set Term Frequency – Inverse Document Frequency matrix
 TODO remove slices to consume memory usage
  */
-func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
+func (fm *FrequencyMatrix) setTfIdf() *[][]float64 {
 
 	var tFIdfMat [][]float64
 
@@ -120,7 +122,7 @@ func (fm *frequencyMatrix) setTfIdf() *[][]float64 {
 /**
 Set singular value decomposition according to term frequency – inverse document frequency matrix
  */
-func (fm *frequencyMatrix) setSingularValueDecomposition(print bool) *singularValueDecomposition {
+func (fm *FrequencyMatrix) setSingularValueDecomposition(print bool) *singularValueDecomposition {
 
 	// Matrix print
 	matPrint := func (X mat.Matrix) {
@@ -176,8 +178,6 @@ Extract data to render lsa plot
  */
 func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]float64 {
 
-	const ( dimToRender int = 3
-		    n int = 2 )
 	dataToRender := make(map[string][]float64)
 	dimsToRender := make([]int, dimToRender)
 
@@ -207,12 +207,12 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 		relativeFrequency := make([]float64, k)
 
 		for i := range intervals {
-			intervals[i] = make([]float64, n)
+			intervals[i] = make([]float64, N)
 		}
 
 		current := minS
 		for i := 0; i < k; i++ {
-			for j := 0; j < n; j++ {
+			for j := 0; j < N; j++ {
 				if j == 0 {
 					intervals[i][j] = current
 				} else {

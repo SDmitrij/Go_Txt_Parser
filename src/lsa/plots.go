@@ -1,4 +1,4 @@
-package main
+package lsa
 
 import (
 	"gonum.org/v1/plot"

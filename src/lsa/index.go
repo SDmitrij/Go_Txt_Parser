@@ -1,4 +1,4 @@
-package main
+package lsa
 
 import (
 	"github.com/caneroj1/stemmer"
@@ -9,32 +9,32 @@ import (
 /**
 This struct describes indexing process
  */
-type indexing struct {
-	filesToIndex []File
-	filesRepo filesRepo
+type Indexing struct {
+	Files []File
+	Repo  FilesRepo
 }
 
-func (idx *indexing) invokeIndexing() {
-	idx.filesRepo.initFilesRepo()
+func (idx *Indexing) InvokeIndexing() {
+	idx.Repo.initFilesRepo()
 	idx.initFilesInfo()
 }
 
 /**
 Init files main info into table
  */
-func (idx *indexing) initFilesInfo() {
+func (idx *Indexing) initFilesInfo() {
 
-	for _, file := range idx.filesToIndex {
+	for _, file := range idx.Files {
 		// Get previous file data
-		prevFileData := idx.filesRepo.getFileInfoAsObj(file.fileUniqueKey)
+		prevFileData := idx.Repo.getFileInfoAsObj(file.fileUniqueKey)
 		if (File{}) != prevFileData {
 			if prevFileData.fileHash != file.fileHash && prevFileData.fileSize != file.fileSize {
-				idx.filesRepo.deleteFileInfo(file.fileUniqueKey)
-				idx.filesRepo.insIntoMainInfoFileTable(file)
+				idx.Repo.deleteFileInfo(file.fileUniqueKey)
+				idx.Repo.insIntoMainInfoFileTable(file)
 				idx.trueIndexing(file)
 			}
 		} else {
-			idx.filesRepo.insIntoMainInfoFileTable(file)
+			idx.Repo.insIntoMainInfoFileTable(file)
 			idx.trueIndexing(file)
 		}
 	}
@@ -43,30 +43,30 @@ func (idx *indexing) initFilesInfo() {
 /**
 Indexing current directory files
  */
-func (idx *indexing) trueIndexing(file File) {
+func (idx *Indexing) trueIndexing(file File) {
 
 	// Get all strings and words of current file
 	fileLines := file.getAllStringsOfFile(file.filePath)
 	// Get all words of current file
 	fileTerms := idx.prepareWords(fileLines)
 	// Create entry tables for each file
-	idx.filesRepo.createTableStrings(file.fileUniqueKey, "tbl_str_pref")
-	idx.filesRepo.createTableTerms(file.fileUniqueKey, "tbl_term_pref")
+	idx.Repo.createTableStrings(file.fileUniqueKey, "tbl_str_pref")
+	idx.Repo.createTableTerms(file.fileUniqueKey, "tbl_term_pref")
 
 	// Index strings of file
 	for _, strFile := range *fileLines {
 		toStringRepo := map[string]string{"file_key": file.fileUniqueKey, "str_of_file": strFile}
-		idx.filesRepo.insIntoTableStrings(toStringRepo, "tbl_str_pref")
+		idx.Repo.insIntoTableStrings(toStringRepo, "tbl_str_pref")
 	}
 
 	// Index words
 	for _, term := range *fileTerms {
 		toTermRepo := map[string] string {"file_key": file.fileUniqueKey, "term_of_file": term}
-		idx.filesRepo.insIntoTableTerms(toTermRepo, "tbl_term_pref")
+		idx.Repo.insIntoTableTerms(toTermRepo, "tbl_term_pref")
 	}
 }
 
-func (idx * indexing) removeStopSymbols(stringOfFile string) []string {
+func (idx *Indexing) removeStopSymbols(stringOfFile string) []string {
 
 	// Simple list of english stop words
 	stopWords := []string {"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your",
@@ -103,7 +103,7 @@ func (idx * indexing) removeStopSymbols(stringOfFile string) []string {
 	return differ
 }
 
-func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
+func (idx *Indexing) prepareWords(fileLines *[]string) *[]string {
 
 	var prepare []string
 
@@ -126,7 +126,7 @@ func (idx *indexing) prepareWords(fileLines *[]string) *[]string {
 /**
 Get the whole terms list for each file
  */
-func (idx * indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
+func (idx *Indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
 
 	var allFilesTerms [][]string
 	var toUnique []string
@@ -147,8 +147,8 @@ func (idx * indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
 		return result
 	}
 
-	for _, file := range idx.filesToIndex {
-		allFilesTerms = append(allFilesTerms, *idx.filesRepo.getAllTermsOfFile(file.fileUniqueKey, "tbl_term_pref"))
+	for _, file := range idx.Files {
+		allFilesTerms = append(allFilesTerms, *idx.Repo.getAllTermsOfFile(file.fileUniqueKey, "tbl_term_pref"))
 	}
 
 	for _, allFileTerm := range allFilesTerms {
