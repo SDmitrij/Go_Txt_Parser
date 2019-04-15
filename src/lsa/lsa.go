@@ -81,7 +81,7 @@ func (lsa *LatentSemanticAnalysis) setFrequencyMatrix() *FrequencyMatrix {
 		}
 	}
 
-	return &FrequencyMatrix{&fMatrix, termsPerFile, &[][]float64{},
+	return &FrequencyMatrix{&fMatrix, termsPerFile, new([][]float64),
 		singularValueDecomposition{}, uniqueFilesTerms}
 }
 
@@ -270,6 +270,10 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 	dataToRender["v_to_Y"] = secondDimRowV
 
 	return &dataToRender
+}
+
+func (svd *singularValueDecomposition) cosSimilarity() {
+
 }
 
 

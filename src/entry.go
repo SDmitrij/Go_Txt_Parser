@@ -23,9 +23,9 @@ func main() {
 		"tbl_str_pref": "strings_of__",
 		"tbl_term_pref": "terms_of__"}
 
-	fr := lsa.FilesRepo{Params: dbParams, Connection: db}
-	idx := lsa.Indexing{Files: files, Repo: fr}
+	fr := lsa.FilesRepo{ Params: dbParams, Connection: db }
+	idx := lsa.Indexing{ Files: files, Repo: fr }
 	idx.InvokeIndexing()
-	analysis := lsa.LatentSemanticAnalysis{ Indexer: idx, Fm: &lsa.FrequencyMatrix{}}
+	analysis := lsa.LatentSemanticAnalysis{ Indexer: idx, Fm: &lsa.FrequencyMatrix{} }
 	analysis.InvokeLsa()
 }
