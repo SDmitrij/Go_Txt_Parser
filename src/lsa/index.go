@@ -129,7 +129,7 @@ Get the whole terms list for each file
 func (idx *Indexing) getTheWholeListOfTerms() (*[][]string, *[]string) {
 
 	var allFilesTerms [][]string
-	var toUnique []string
+	var toUnique      []string
 
 	// Fast de-duplicator
 	removeDuplicates := func(elements []string) []string {

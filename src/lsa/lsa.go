@@ -17,16 +17,16 @@ type LatentSemanticAnalysis struct {
 
 type FrequencyMatrix struct {
 	frequencyMatrixVectors *[][]int
-	termsPerFile []int
-	tFIdf *[][]float64
-	SVD singularValueDecomposition
-	uniqueTerms *[]string
+	termsPerFile 			[]int
+	tFIdf 				   *[][]float64
+	SVD                     singularValueDecomposition
+	uniqueTerms            *[]string
 }
 
 type singularValueDecomposition struct {
-	U mat.Matrix
-	V mat.Matrix
-	S []float64
+	U  mat.Matrix
+	V  mat.Matrix
+	S  []float64
 	fm *FrequencyMatrix
 }
 
@@ -48,7 +48,7 @@ TODO remove slices to consume memory usage
  */
 func (lsa *LatentSemanticAnalysis) setFrequencyMatrix() *FrequencyMatrix {
 
-	var fMatrix [][]int
+	var fMatrix      [][]int
 	var termsPerFile []int
 	filesTerms, uniqueFilesTerms := lsa.Indexer.getTheWholeListOfTerms()
 
@@ -200,10 +200,10 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 			return min, max
 		}
 
-		minS, maxS := getMinMaxElem()
-		spread := maxS - minS
-		h := spread / float64(k)
-		intervals := make([][]float64, k)
+		minS, maxS :=        getMinMaxElem()
+		spread :=            maxS - minS
+		h :=                 spread / float64(k)
+		intervals :=         make([][]float64, k)
 		relativeFrequency := make([]float64, k)
 
 		for i := range intervals {

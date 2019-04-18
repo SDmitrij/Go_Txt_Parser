@@ -13,10 +13,10 @@ import (
 Structure that describes file entity
  */
 type File struct {
-	filePath string
+	filePath      string
 	fileUniqueKey string
-	fileHash string
-	fileSize int
+	fileHash 	  string
+	fileSize      int
 }
 
 /**
