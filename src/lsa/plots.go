@@ -8,7 +8,7 @@ import (
 	"image/color"
 )
 
-func (svd *singularValueDecomposition) createHistSvdSPlot(data []float64) {
+func (svd *singularValueDecomposition) createHistSvdSPlot() {
 
 	p, err := plot.New()
 	if err != nil {
@@ -19,13 +19,13 @@ func (svd *singularValueDecomposition) createHistSvdSPlot(data []float64) {
 	p.X.Label.Text = "Singular values"
 	p.Y.Label.Text = "Importance"
 
-	v := make(plotter.Values, len(data))
+	v := make(plotter.Values, len((*svd.dataToRender)["s_to_hist"]))
 
 	for i := range v {
-		v[i] = data[i]
+		v[i] = (*svd.dataToRender)["s_to_hist"][i]
 	}
 
-	h, err := plotter.NewHist(v, len(data))
+	h, err := plotter.NewHist(v, len((*svd.dataToRender)["s_to_hist"]))
 	if err != nil {
 		panic(err)
 	}
@@ -39,8 +39,7 @@ func (svd *singularValueDecomposition) createHistSvdSPlot(data []float64) {
 	}
 }
 
-func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(
-	uToX, uToY, vToX, vToY []float64) {
+func (svd *singularValueDecomposition) createTermDocumentDependencyPlot() {
 
 	createPoints := func(x, y []float64) plotter.XYs {
 		points := make(plotter.XYs, len(x))
@@ -61,7 +60,7 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(
 	p.X.Label.Text = "First dimension"
 	p.Y.Label.Text = "Second dimension"
 
-	t, err := plotter.NewScatter(createPoints(uToX, uToY))
+	t, err := plotter.NewScatter(createPoints((*svd.dataToRender)["u_to_X"], (*svd.dataToRender)["u_to_Y"]))
 	if err != nil {
 		panic(err)
 	}
@@ -69,7 +68,7 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(
 	t.Radius = 2 * vg.Millimeter
 	t.Color = color.RGBA{R: 255, A:255}
 
-	d, err := plotter.NewScatter(createPoints(vToX, vToY))
+	d, err := plotter.NewScatter(createPoints((*svd.dataToRender)["v_to_X"], (*svd.dataToRender)["v_to_Y"]))
 	if err != nil {
 		panic(err)
 	}

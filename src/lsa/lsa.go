@@ -16,18 +16,19 @@ type LatentSemanticAnalysis struct {
 }
 
 type FrequencyMatrix struct {
-	frequencyMatrixVectors *[][]int
-	termsPerFile 			[]int
-	tFIdf 				   *[][]float64
-	SVD                     singularValueDecomposition
-	uniqueTerms            *[]string
+	frequencyMatrixVectors	*[][]int
+	termsPerFile 			 []int
+	tFIdf 				    *[][]float64
+	SVD                      singularValueDecomposition
+	uniqueTerms             *[]string
 }
 
 type singularValueDecomposition struct {
-	U  mat.Matrix
-	V  mat.Matrix
-	S  []float64
-	fm *FrequencyMatrix
+	U             mat.Matrix
+	V   		  mat.Matrix
+	S   		  []float64
+	fm			 *FrequencyMatrix
+	dataToRender *map[string][]float64
 }
 
 func (lsa *LatentSemanticAnalysis) InvokeLsa() {
@@ -36,10 +37,9 @@ func (lsa *LatentSemanticAnalysis) InvokeLsa() {
 	fm.SVD = *fm.setSingularValueDecomposition(true)
 	lsa.Fm = fm
 	dataToRender := fm.SVD.prepareSvdDataToRender()
-	fm.SVD.createHistSvdSPlot((*dataToRender)["s_to_hist"])
-	fm.SVD.createTermDocumentDependencyPlot(
-		(*dataToRender)["u_to_X"], (*dataToRender)["u_to_Y"],
-		(*dataToRender)["v_to_X"], (*dataToRender)["v_to_Y"])
+	fm.SVD.dataToRender = dataToRender
+	fm.SVD.createHistSvdSPlot()
+	fm.SVD.createTermDocumentDependencyPlot()
 }
 
 /**
@@ -170,7 +170,7 @@ func (fm *FrequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 		fmt.Println(S)
 	}
 
-	return &singularValueDecomposition{U, V, S, fm}
+	return &singularValueDecomposition{U, V, S, fm, new(map[string][]float64)}
 }
 
 /**
