@@ -20,15 +20,15 @@ type FrequencyMatrix struct {
 	termsPerFile 			 []int
 	tFIdf 				    *[][]float64
 	SVD                      singularValueDecomposition
-	uniqueTerms             *[]string
+	uniqueTerms				*[]string
 }
 
 type singularValueDecomposition struct {
-	U             mat.Matrix
-	V   		  mat.Matrix
-	S   		  []float64
-	fm			 *FrequencyMatrix
-	dataToRender *map[string][]float64
+	U				mat.Matrix
+	V				mat.Matrix
+	S				[]float64
+	fm				*FrequencyMatrix
+	dataToRender	*map[string][]float64
 }
 
 func (lsa *LatentSemanticAnalysis) InvokeLsa() {
@@ -130,12 +130,12 @@ func (fm *FrequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 		fmt.Printf("%v\n", fa)
 	}
 
-	var nDim, mDim, it int
-	var minNM float64
-	var S []float64
-	nDim = len(*fm.tFIdf)
-	mDim = len((*fm.tFIdf)[0])
-	toSVDVec := make([]float64, nDim * mDim)
+	var nDim, mDim, it	int
+	var minNM			float64
+	var S				[]float64
+	nDim =				len(*fm.tFIdf)
+	mDim =				len((*fm.tFIdf)[0])
+	toSVDVec :=			make([]float64, nDim * mDim)
 
 	for _, vector := range *fm.tFIdf {
 		for _, elem := range vector {
@@ -144,10 +144,10 @@ func (fm *FrequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 		}
 	}
 
-	SVD := mat.SVD{}
-	toSVD := mat.NewDense(nDim, mDim, toSVDVec)
+	SVD :=		mat.SVD{}
+	toSVD :=	mat.NewDense(nDim, mDim, toSVDVec)
+	minNM =		math.Min(float64(nDim), float64(mDim))
 
-	minNM = math.Min(float64(nDim), float64(mDim))
 	SVD.Factorize(toSVD, mat.SVDThin)
 
 	// Left singular vector and right singular vector

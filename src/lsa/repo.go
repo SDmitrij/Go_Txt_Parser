@@ -5,8 +5,8 @@ import (
 )
 
 type FilesRepo struct {
-	Params     map[string]string
-	Connection *sql.DB
+	Params		map[string]string
+	Connection	*sql.DB
 }
 
 /**
