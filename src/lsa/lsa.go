@@ -19,7 +19,7 @@ type FrequencyMatrix struct {
 	frequencyMatrixVectors	*[][]int
 	termsPerFile 			 []int
 	tFIdf 				    *[][]float64
-	SVD                      singularValueDecomposition
+	SVD                     *singularValueDecomposition
 	uniqueTerms				*[]string
 }
 
@@ -32,12 +32,15 @@ type singularValueDecomposition struct {
 }
 
 func (lsa *LatentSemanticAnalysis) InvokeLsa() {
-	fm := lsa.setFrequencyMatrix()
-	fm.tFIdf = fm.setTfIdf()
-	fm.SVD = *fm.setSingularValueDecomposition(true)
-	lsa.Fm = fm
-	dataToRender := fm.SVD.prepareSvdDataToRender()
-	fm.SVD.dataToRender = dataToRender
+
+	fm :=					lsa.setFrequencyMatrix()
+	fm.tFIdf =				fm.setTfIdf()
+	fm.SVD =				fm.setSingularValueDecomposition(true)
+	lsa.Fm =				fm
+	fm.SVD.dataToRender =	fm.SVD.prepareSvdDataToRender()
+	fm.SVD.cosSimilarity()
+
+	// Plotting
 	fm.SVD.createHistSvdSPlot()
 	fm.SVD.createTermDocumentDependencyPlot()
 }
@@ -48,8 +51,8 @@ TODO remove slices to consume memory usage
  */
 func (lsa *LatentSemanticAnalysis) setFrequencyMatrix() *FrequencyMatrix {
 
-	var fMatrix      [][]int
-	var termsPerFile []int
+	var fMatrix      				[][]int
+	var termsPerFile 				[]int
 	filesTerms, uniqueFilesTerms := lsa.Indexer.getTheWholeListOfTerms()
 
 	// Fill array of vectors that contains term's matches in docs
@@ -82,7 +85,7 @@ func (lsa *LatentSemanticAnalysis) setFrequencyMatrix() *FrequencyMatrix {
 	}
 
 	return &FrequencyMatrix{&fMatrix, termsPerFile, new([][]float64),
-		singularValueDecomposition{}, uniqueFilesTerms}
+		&singularValueDecomposition{}, uniqueFilesTerms}
 }
 
 /**
@@ -272,8 +275,31 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 	return &dataToRender
 }
 
+/**
+Calculate cos similarity between documents
+ */
 func (svd *singularValueDecomposition) cosSimilarity() {
 
+	vectorsToSim := make([]mat.VecDense, len((*svd.dataToRender)["v_to_X"]))
+	cosSimValues := make(map[*mat.VecDense][]float64)
+
+	for i := 0; i < len((*svd.dataToRender)["v_to_X"]); i++ {
+		vectorsToSim[i] = *mat.NewVecDense(2, []float64{(*svd.dataToRender)["v_to_X"][i],
+			(*svd.dataToRender)["v_to_Y"][i]})
+	}
+
+	for toCmp := 0; toCmp < len(vectorsToSim); toCmp++ {
+		tmpValues := make([]float64, len(vectorsToSim))
+		for vec := toCmp; vec < len(vectorsToSim); vec++ {
+
+			//  (A x B) / (sqrt(sum(A^2))|norm(A) x sqrt(sum(B^2)|norm(B)))
+			tmpValues[vec] = (	mat.Dot(&vectorsToSim[toCmp], &vectorsToSim[vec])	) /
+				( /*norm(A)*/ math.Sqrt(mat.Dot(&vectorsToSim[toCmp], &vectorsToSim[toCmp])) *
+				  /*norm(B)*/ math.Sqrt(mat.Dot(&vectorsToSim[vec], &vectorsToSim[vec])) )
+
+		}
+		cosSimValues[&vectorsToSim[toCmp]] = tmpValues
+	}
 }
 
 
