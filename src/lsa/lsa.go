@@ -38,7 +38,7 @@ func (lsa *LatentSemanticAnalysis) InvokeLsa() {
 	fm.SVD =				fm.setSingularValueDecomposition(true)
 	lsa.Fm =				fm
 	fm.SVD.dataToRender =	fm.SVD.prepareSvdDataToRender()
-	fm.SVD.cosSimilarity()
+	fm.SVD.cosSimilarityOfDocuments()
 
 	// Plotting
 	fm.SVD.createHistSvdSPlot()
@@ -266,6 +266,7 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 	mat.Row(firstDimRowV, firstDim, svd.V)
 	mat.Row(secondDimRowV, secondDim, svd.V)
 
+	// Data to plot
 	dataToRender["s_to_hist"] = svdSValImportance
 	dataToRender["u_to_X"] = firstDimColU
 	dataToRender["u_to_Y"] = secondDimColU
@@ -278,10 +279,10 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 /**
 Calculate cos similarity between documents
  */
-func (svd *singularValueDecomposition) cosSimilarity() {
+func (svd *singularValueDecomposition) cosSimilarityOfDocuments() {
 
 	vectorsToSim := make([]mat.VecDense, len((*svd.dataToRender)["v_to_X"]))
-	cosSimValues := make(map[*mat.VecDense][]float64)
+	cosSimValues := make([][]float64, len((*svd.dataToRender)["v_to_X"]))
 
 	for i := 0; i < len((*svd.dataToRender)["v_to_X"]); i++ {
 		vectorsToSim[i] = *mat.NewVecDense(2, []float64{(*svd.dataToRender)["v_to_X"][i],
@@ -289,17 +290,22 @@ func (svd *singularValueDecomposition) cosSimilarity() {
 	}
 
 	for toCmp := 0; toCmp < len(vectorsToSim); toCmp++ {
+
 		tmpValues := make([]float64, len(vectorsToSim))
-		for vec := toCmp; vec < len(vectorsToSim); vec++ {
 
-			//  (A x B) / (sqrt(sum(A^2))|norm(A) x sqrt(sum(B^2)|norm(B)))
-			tmpValues[vec] = (	mat.Dot(&vectorsToSim[toCmp], &vectorsToSim[vec])	) /
-				( /*norm(A)*/ math.Sqrt(mat.Dot(&vectorsToSim[toCmp], &vectorsToSim[toCmp])) *
-				  /*norm(B)*/ math.Sqrt(mat.Dot(&vectorsToSim[vec], &vectorsToSim[vec])) )
+		for vec := 0; vec < len(vectorsToSim); vec++ {
 
+			if vec != toCmp {
+				//  cos(Theta) = (A x B) / (sqrt(sum(A^2))|norm(A) x sqrt(sum(B^2)|norm(B)))
+				tmpValues[vec] = (mat.Dot(&vectorsToSim[toCmp], &vectorsToSim[vec])) /
+					( /*norm(A)*/ math.Sqrt(mat.Dot(&vectorsToSim[toCmp], &vectorsToSim[toCmp])) *
+					  /*norm(B)*/ math.Sqrt(mat.Dot(&vectorsToSim[vec], &vectorsToSim[vec])) )
+			}
 		}
-		cosSimValues[&vectorsToSim[toCmp]] = tmpValues
+		cosSimValues[toCmp] = tmpValues
 	}
+
+	fmt.Println(cosSimValues)
 }
 
 
