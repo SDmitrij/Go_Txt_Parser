@@ -6,6 +6,7 @@ import (
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 	"image/color"
+	"path/filepath"
 )
 
 func (svd *singularValueDecomposition) createHistSvdSPlot() {
@@ -19,13 +20,13 @@ func (svd *singularValueDecomposition) createHistSvdSPlot() {
 	p.X.Label.Text = "Singular values"
 	p.Y.Label.Text = "Importance"
 
-	v := make(plotter.Values, len((*svd.dataToRender)["s_to_hist"]))
+	v := make(plotter.Values, len((*svd.dataToRender)["S_TO_HIST"]))
 
 	for i := range v {
-		v[i] = (*svd.dataToRender)["s_to_hist"][i]
+		v[i] = (*svd.dataToRender)["S_TO_HIST"][i]
 	}
 
-	h, err := plotter.NewHist(v, len((*svd.dataToRender)["s_to_hist"]))
+	h, err := plotter.NewHist(v, len((*svd.dataToRender)["S_TO_HIST"]))
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +40,7 @@ func (svd *singularValueDecomposition) createHistSvdSPlot() {
 	}
 }
 
-func (svd *singularValueDecomposition) createTermDocumentDependencyPlot() {
+func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(files *[]File) {
 
 	createPoints := func(x, y []float64) plotter.XYs {
 		points := make(plotter.XYs, len(x))
@@ -60,7 +61,7 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot() {
 	p.X.Label.Text = "First dimension"
 	p.Y.Label.Text = "Second dimension"
 
-	t, err := plotter.NewScatter(createPoints((*svd.dataToRender)["u_to_X"], (*svd.dataToRender)["u_to_Y"]))
+	t, err := plotter.NewScatter(createPoints((*svd.dataToRender)["U_TO_X"], (*svd.dataToRender)["U_TO_Y"]))
 	if err != nil {
 		panic(err)
 	}
@@ -68,14 +69,28 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot() {
 	t.Radius = 2 * vg.Millimeter
 	t.Color = color.RGBA{R: 255, A:255}
 
-	d, err := plotter.NewScatter(createPoints((*svd.dataToRender)["v_to_X"], (*svd.dataToRender)["v_to_Y"]))
+	VPoints := createPoints((*svd.dataToRender)["V_TO_X"], (*svd.dataToRender)["V_TO_Y"])
+	d, err := plotter.NewScatter(VPoints)
 	if err != nil {
 		panic(err)
 	}
 	d.GlyphStyle.Shape = draw.PyramidGlyph{}
 	d.Radius = 2 * vg.Millimeter
 	d.Color = color.RGBA{R:0, A:255}
-	p.Add(t, d)
+
+	FileNames := make([]string, len(*files))
+	for i, file := range *files {
+		FileNames[i] = filepath.Base(file.filePath)
+	}
+
+	labels := plotter.XYLabels{VPoints, FileNames }
+	l, err := plotter.NewLabels(labels)
+	if err != nil {
+		panic(err)
+	}
+	l.XOffset = 2 * vg.Millimeter
+
+	p.Add(t, d, l)
 	p.Legend.Padding = 2 * vg.Millimeter
 	p.Legend.Add("term", t)
 	p.Legend.Add("document", d)

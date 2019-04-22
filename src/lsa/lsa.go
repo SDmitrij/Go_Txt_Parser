@@ -42,7 +42,7 @@ func (lsa *LatentSemanticAnalysis) InvokeLsa() {
 
 	// Plotting
 	fm.SVD.createHistSvdSPlot()
-	fm.SVD.createTermDocumentDependencyPlot()
+	fm.SVD.createTermDocumentDependencyPlot(&lsa.Indexer.Files)
 }
 
 /**
@@ -267,11 +267,12 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 	mat.Row(secondDimRowV, secondDim, svd.V)
 
 	// Data to plot
-	dataToRender["s_to_hist"] = svdSValImportance
-	dataToRender["u_to_X"] = firstDimColU
-	dataToRender["u_to_Y"] = secondDimColU
-	dataToRender["v_to_X"] = firstDimRowV
-	dataToRender["v_to_Y"] = secondDimRowV
+	dataToRender["S_TO_HIST"] = svdSValImportance
+	// Points
+	dataToRender["U_TO_X"] = firstDimColU
+	dataToRender["U_TO_Y"] = secondDimColU
+	dataToRender["V_TO_X"] = firstDimRowV
+	dataToRender["V_TO_Y"] = secondDimRowV
 
 	return &dataToRender
 }
@@ -281,12 +282,12 @@ Calculate cos similarity between documents
  */
 func (svd *singularValueDecomposition) cosSimilarityOfDocuments() {
 
-	vectorsToSim := make([]mat.VecDense, len((*svd.dataToRender)["v_to_X"]))
-	cosSimValues := make([][]float64, len((*svd.dataToRender)["v_to_X"]))
+	vectorsToSim := make([]mat.VecDense, len((*svd.dataToRender)["V_TO_X"]))
+	cosSimValues := make([][]float64, len((*svd.dataToRender)["V_TO_X"]))
 
-	for i := 0; i < len((*svd.dataToRender)["v_to_X"]); i++ {
-		vectorsToSim[i] = *mat.NewVecDense(2, []float64{(*svd.dataToRender)["v_to_X"][i],
-			(*svd.dataToRender)["v_to_Y"][i]})
+	for i := 0; i < len((*svd.dataToRender)["V_TO_X"]); i++ {
+		vectorsToSim[i] = *mat.NewVecDense(2,
+			[]float64{ (*svd.dataToRender)["V_TO_X"][i], (*svd.dataToRender)["V_TO_Y"][i] })
 	}
 
 	for toCmp := 0; toCmp < len(vectorsToSim); toCmp++ {
@@ -302,10 +303,23 @@ func (svd *singularValueDecomposition) cosSimilarityOfDocuments() {
 					  /*norm(B)*/ math.Sqrt(mat.Dot(&vectorsToSim[vec], &vectorsToSim[vec])) )
 			}
 		}
+
 		cosSimValues[toCmp] = tmpValues
 	}
 
+	// TODO get min distances between docs and then split to folders according to this distances (cos(Theta))
 	fmt.Println(cosSimValues)
+
+	//for i := 0; i < len(cosSimValues); i++ {
+	//
+	//	minInSub := cosSimValues[0][0]
+	//
+	//	for j := 0; j < len(cosSimValues[i]); j++ {
+	//		if cosSimValues[i][j] < minInSub && cosSimValues[i][j] != 0 {
+	//			minInSub = cosSimValues[i][j]
+	//		}
+	//	}
+	//}
 }
 
 
