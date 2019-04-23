@@ -16,9 +16,9 @@ func (svd *singularValueDecomposition) createHistSvdSPlot() {
 		panic(err)
 	}
 
-	p.Title.Text = "Singular values histogram"
-	p.X.Label.Text = "Singular values"
-	p.Y.Label.Text = "Importance"
+	p.Title.Text        = "Singular values histogram"
+	p.X.Label.Text      = "Singular values"
+	p.Y.Label.Text      = "Importance"
 
 	v := make(plotter.Values, len((*svd.dataToRender)["S_TO_HIST"]))
 
@@ -57,9 +57,9 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(files *[
 		panic(err)
 	}
 
-	p.Title.Text = "Term - document dependency"
-	p.X.Label.Text = "First dimension"
-	p.Y.Label.Text = "Second dimension"
+	p.Title.Text        = "Term - document dependency"
+	p.X.Label.Text      = "First dimension"
+	p.Y.Label.Text      = "Second dimension"
 
 	t, err := plotter.NewScatter(createPoints((*svd.dataToRender)["U_TO_X"], (*svd.dataToRender)["U_TO_Y"]))
 	if err != nil {
@@ -70,6 +70,7 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(files *[
 	t.Color = color.RGBA{R: 255, A:255}
 
 	VPoints := createPoints((*svd.dataToRender)["V_TO_X"], (*svd.dataToRender)["V_TO_Y"])
+
 	d, err := plotter.NewScatter(VPoints)
 	if err != nil {
 		panic(err)
@@ -83,14 +84,15 @@ func (svd *singularValueDecomposition) createTermDocumentDependencyPlot(files *[
 		FileNames[i] = filepath.Base(file.filePath)
 	}
 
-	labels := plotter.XYLabels{VPoints, FileNames }
-	l, err := plotter.NewLabels(labels)
+	l, err := plotter.NewLabels(plotter.XYLabels{VPoints, FileNames })
 	if err != nil {
 		panic(err)
 	}
 	l.XOffset = 2 * vg.Millimeter
 
+	// Add objects to plot
 	p.Add(t, d, l)
+
 	p.Legend.Padding = 2 * vg.Millimeter
 	p.Legend.Add("term", t)
 	p.Legend.Add("document", d)

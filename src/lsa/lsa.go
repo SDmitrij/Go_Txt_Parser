@@ -33,11 +33,11 @@ type singularValueDecomposition struct {
 
 func (lsa *LatentSemanticAnalysis) InvokeLsa() {
 
-	fm :=					lsa.setFrequencyMatrix()
-	fm.tFIdf =				fm.setTfIdf()
-	fm.SVD =				fm.setSingularValueDecomposition(true)
-	lsa.Fm =				fm
-	fm.SVD.dataToRender =	fm.SVD.prepareSvdDataToRender()
+	fm                      := lsa.setFrequencyMatrix()
+	fm.tFIdf                 = fm.setTfIdf()
+	fm.SVD                   = fm.setSingularValueDecomposition(true)
+	lsa.Fm                   = fm
+	fm.SVD.dataToRender      = fm.SVD.prepareSvdDataToRender()
 	fm.SVD.cosSimilarityOfDocuments()
 
 	// Plotting
@@ -136,9 +136,9 @@ func (fm *FrequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 	var nDim, mDim, it	int
 	var minNM			float64
 	var S				[]float64
-	nDim =				len(*fm.tFIdf)
-	mDim =				len((*fm.tFIdf)[0])
-	toSVDVec :=			make([]float64, nDim * mDim)
+	nDim                = len(*fm.tFIdf)
+	mDim                = len((*fm.tFIdf)[0])
+	toSVDVec           := make([]float64, nDim * mDim)
 
 	for _, vector := range *fm.tFIdf {
 		for _, elem := range vector {
@@ -147,9 +147,9 @@ func (fm *FrequencyMatrix) setSingularValueDecomposition(print bool) *singularVa
 		}
 	}
 
-	SVD :=		mat.SVD{}
-	toSVD :=	mat.NewDense(nDim, mDim, toSVDVec)
-	minNM =		math.Min(float64(nDim), float64(mDim))
+	SVD         := mat.SVD{}
+	toSVD       := mat.NewDense(nDim, mDim, toSVDVec)
+	minNM        = math.Min(float64(nDim), float64(mDim))
 
 	SVD.Factorize(toSVD, mat.SVDThin)
 
@@ -203,11 +203,11 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 			return min, max
 		}
 
-		minS, maxS :=        getMinMaxElem()
-		spread :=            maxS - minS
-		h :=                 spread / float64(k)
-		intervals :=         make([][]float64, k)
-		relativeFrequency := make([]float64, k)
+		minS, maxS           := getMinMaxElem()
+		spread               := maxS - minS
+		h                    := spread / float64(k)
+		intervals            := make([][]float64, k)
+		relativeFrequency    := make([]float64, k)
 
 		for i := range intervals {
 			intervals[i] = make([]float64, N)
@@ -228,8 +228,8 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 		for _, s := range svd.S {
 			for i := 0; i < k; i++ {
 				// Compare according to float numbers
-				sValToCmp := big.NewFloat(s)
-				firstToCmp := big.NewFloat(intervals[i][0])
+				sValToCmp   := big.NewFloat(s)
+				firstToCmp  := big.NewFloat(intervals[i][0])
 				secondToCmp := big.NewFloat(intervals[i][1])
 
 				if sValToCmp.Cmp(firstToCmp) >= 0 && sValToCmp.Cmp(secondToCmp) <= 0 {
