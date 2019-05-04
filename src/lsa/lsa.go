@@ -21,6 +21,7 @@ type FrequencyMatrix struct {
 	tFIdf 				    *[][]float64
 	SVD                     *singularValueDecomposition
 	uniqueTerms				*[]string
+	cosSimilarityDocs       *[][]float64
 }
 
 type singularValueDecomposition struct {
@@ -38,11 +39,12 @@ func (lsa *LatentSemanticAnalysis) InvokeLsa() {
 	fm.SVD                   = fm.setSingularValueDecomposition(true)
 	lsa.Fm                   = fm
 	fm.SVD.dataToRender      = fm.SVD.prepareSvdDataToRender()
-	fm.SVD.cosSimilarityOfDocuments()
+	fm.cosSimilarityDocs 	 = fm.SVD.cosineSimilarityOfDocuments()
 
 	// Plotting
 	fm.SVD.createHistSvdSPlot()
 	fm.SVD.createTermDocumentDependencyPlot(&lsa.Indexer.Files)
+	fm.SVD.cosineSimDocsPlot(&lsa.Indexer.Files)
 }
 
 /**
@@ -85,7 +87,7 @@ func (lsa *LatentSemanticAnalysis) setFrequencyMatrix() *FrequencyMatrix {
 	}
 
 	return &FrequencyMatrix{&fMatrix, termsPerFile, new([][]float64),
-		&singularValueDecomposition{}, uniqueFilesTerms}
+		       &singularValueDecomposition{}, uniqueFilesTerms, new([][]float64)}
 }
 
 /**
@@ -280,10 +282,10 @@ func (svd *singularValueDecomposition) prepareSvdDataToRender() *map[string][]fl
 /**
 Calculate cos similarity between documents
  */
-func (svd *singularValueDecomposition) cosSimilarityOfDocuments() {
+func (svd *singularValueDecomposition) cosineSimilarityOfDocuments() *[][]float64 {
 
 	vectorsToSim := make([]mat.VecDense, len((*svd.dataToRender)["V_TO_X"]))
-	cosSimValues := make([][]float64, len((*svd.dataToRender)["V_TO_X"]))
+	cosSimValues := make([][]float64, 	 len((*svd.dataToRender)["V_TO_X"]))
 
 	for i := 0; i < len((*svd.dataToRender)["V_TO_X"]); i++ {
 		vectorsToSim[i] = *mat.NewVecDense(2,
@@ -307,19 +309,7 @@ func (svd *singularValueDecomposition) cosSimilarityOfDocuments() {
 		cosSimValues[toCmp] = tmpValues
 	}
 
-	// TODO get min distances between docs and then split to folders according to this distances (cos(Theta))
-	fmt.Println(cosSimValues)
-
-	//for i := 0; i < len(cosSimValues); i++ {
-	//
-	//	minInSub := cosSimValues[0][0]
-	//
-	//	for j := 0; j < len(cosSimValues[i]); j++ {
-	//		if cosSimValues[i][j] < minInSub && cosSimValues[i][j] != 0 {
-	//			minInSub = cosSimValues[i][j]
-	//		}
-	//	}
-	//}
+	return &cosSimValues
 }
 
 
